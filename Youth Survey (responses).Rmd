@@ -97,7 +97,7 @@ write.table (tracking_table, "/Users/gurkirat/Desktop/tracking_table.txt", sep =
 ```
 
 ```{r}
-#grouping no responses by enumerator IDs
+##grouping no responses by enumerator IDs
 v <- youth_survey_responses$`Andhra Pradesh now has many cash schemes to give money to its citizens, like Ammavodi and YSR Cheyutha. Do you believe the amount given in cash schemes should be more or less?` == "No Response"
 
 vv <- aggregate(v, by = list(youth_survey_responses$`Enumerator Code`), mean)
