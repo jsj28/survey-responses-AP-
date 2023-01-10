@@ -1,0 +1,109 @@
+---
+title: "Youth Survey (Responses)"
+author: "Gurkirat"
+date: "23/12/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(haven)
+library(readr)
+library (dplyr)
+library(cowplot)
+library(tidyverse)
+library(ggplot2)
+library(MASS)
+library(ggrepel)
+library(RColorBrewer)
+library(stargazer)
+library(DeclareDesign)
+library(texreg)
+library(car)
+library(lubridate)
+library(scales)
+library(cowplot)
+library(writexl)
+library(janitor)
+library(gridExtra)
+library(grid)
+library(ggpubr)
+library(kableExtra)
+library(data.table)
+library(foreign)
+library(readxl)
+```
+
+
+```{r}
+#Merging datasets
+ys_responses_1 <- read_excel("/Users/gurkirat/Desktop/AP project/Datasets/Youth_Survey_ANU_20thDec_Translated_-_all_versions_-_English_en_-_2023-01-08-10-20-18.xlsx")
+ys_responses_2 <- read_excel("/Users/gurkirat/Desktop/AP project/Datasets/Youth_Survey_Andhra_Pradesh_Translated_30thNov_-_all_versions_-_English_en_-_2023-01-08-10-19-26.xlsx")
+ys_responses_3 <- read_excel("/Users/gurkirat/Desktop/AP project/Datasets/Youth_Survey_AU_21stDec_Translated_-_all_versions_-_English_en_-_2023-01-08-10-18-45.xlsx")
+
+ys1 <- colnames(ys_responses_1)
+ys2 <- colnames(ys_responses_2)
+ys3 <- colnames(ys_responses_3)
+
+match(ys2,ys1)
+
+ys_responses_2 <- ys_responses_2[,-205]
+
+youth_survey_responses <- rbind (ys_responses_1, ys_responses_2, ys_responses_3)
+
+ys4 <- colnames (youth_survey_responses)
+
+write.table (youth_survey_responses, "/Users/gurkirat/Desktop/youth_survey_responses (8th January).txt", sep = "\t")
+```
+
+```{r}
+v <- as.data.frame(table(youth_survey_responses$`Secretariat Code`)) %>% 
+rename ("Secretariat Number" = Var1) %>% 
+rename ("Surveys Completed" = Freq)
+
+v %>%
+  kbl(caption = "Completed Surveys by Secretariat Code")%>%
+  kable_classic(full_width = F, html_font = "Cambria", font_size = 15)
+```
+
+```{r}
+v <- as.data.frame(table(youth_survey_responses$`Secretariat Name`)) %>% 
+rename ("Secretariat Name" = Var1) %>% 
+rename ("Surveys Completed" = Freq)
+
+v %>%
+  kbl(caption = "Completed Surveys by Secretariat Name")%>%
+  kable_classic(full_width = F, html_font = "Cambria", font_size = 15)
+```
+
+```{r}
+v <- as.data.frame(table(youth_survey_responses$`Enumerator Code`)) %>% 
+rename ("Enumerator Code" = Var1) %>% 
+rename ("Surveys Completed" = Freq)
+
+v %>%
+  kbl(caption = "Completed Surveys by Enumerator Code")%>%
+  kable_classic(full_width = F, html_font = "Cambria", font_size = 15)
+```
+
+```{r}
+youth_survey_responses <- youth_survey_responses %>% 
+mutate ("No. of Officers" = 1)
+
+tracking_table <- youth_survey_responses %>% 
+group_by(`Secretariat Code`,`Enumerator Code`) %>% 
+summarise("Total Surveys Done" = sum(`No. of Officers`))
+
+write.table (tracking_table, "/Users/gurkirat/Desktop/tracking_table.txt", sep = "\t")
+```
+
+```{r}
+#grouping no responses by enumerator IDs
+v <- youth_survey_responses$`Andhra Pradesh now has many cash schemes to give money to its citizens, like Ammavodi and YSR Cheyutha. Do you believe the amount given in cash schemes should be more or less?` == "No Response"
+
+vv <- aggregate(v, by = list(youth_survey_responses$`Enumerator Code`), mean)
+
+v3 <- table(youth_survey_responses$`Enumerator Code`)
+
+o <- order (vv[,2], decreasing = TRUE)
+```
+
