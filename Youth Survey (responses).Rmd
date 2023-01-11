@@ -84,6 +84,13 @@ rename ("Surveys Completed" = Freq)
 v %>%
   kbl(caption = "Completed Surveys by Enumerator Code")%>%
   kable_classic(full_width = F, html_font = "Cambria", font_size = 15)
+
+a <- a
+
+a %>% 
+kbl(caption = "No Responses by Column Names", desc())%>%
+  kable_classic(full_width = F, html_font = "Cambria", font_size = 15)
+
 ```
 
 ```{r}

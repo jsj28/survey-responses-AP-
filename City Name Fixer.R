@@ -1,9 +1,7 @@
 library(data.table)
-library(tidyverse)
 
 
-AP_Youth_Survey <- fread("/Users/vaibhav/Documents/CPR\ -\ Work/AP\ Project/youth_survey_responses (8th January).csv")
-
+AP_Youth_Survey <- youth_survey_responses
 
 v <- c("VIJAYAWADA", "VIJAYAWADa")
 
@@ -22,6 +20,8 @@ v <- c("Tirupathi", "tirupati", "Tirupati", "TIRUPATI")
 
 AP_Youth_Survey$`City Name` <- ifelse(AP_Youth_Survey$`City Name` %in% v,
                                       "Tirupati", AP_Youth_Survey$`City Name`)
+
+
 
 v <- c("Tadipatri", "TADIPATRI", "TADIPARI", "Tadipari", "1007")
 
@@ -75,6 +75,7 @@ AP_Youth_Survey$`City Name` <- ifelse(AP_Youth_Survey$`City Name` %in% v,
                                       "Eluru", AP_Youth_Survey$`City Name`)
 
 
+table(AP_Youth_Survey$`City Name`)
 #Analysis
 AP_Youth_Survey$`Ideally, which of the following type of work would you prefer?`
 
