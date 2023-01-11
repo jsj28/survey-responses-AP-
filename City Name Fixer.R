@@ -1,4 +1,9 @@
 library(data.table)
+library(readxl)
+
+#Updated
+
+AP_Youth_Survey <- read_excel("youth_survey_responses (11th January).xlsx")
 
 
 AP_Youth_Survey <- youth_survey_responses
@@ -75,6 +80,7 @@ AP_Youth_Survey$`City Name` <- ifelse(AP_Youth_Survey$`City Name` %in% v,
                                       "Eluru", AP_Youth_Survey$`City Name`)
 
 
+##Analysis
 table(AP_Youth_Survey$`City Name`)
 #Analysis
 AP_Youth_Survey$`Ideally, which of the following type of work would you prefer?`
@@ -98,27 +104,68 @@ table(AP_Youth_Survey$`Do you pay rent to live in this house?`)
 #Yes No Response - 150,151,152,153, 154, 156,158, 160, 162, 163, 165, 166, 167, 168, 169, 170, 174, 
 #175, 176, 
 
-#Question wise non responses####
-vec <- c(119,121, 122, 123, 125, 127, 129, 130, 132, 133, 137, 138, 139, 150,151,152,153, 154, 156,158, 160, 162, 163, 165, 166, 167, 168, 169, 170, 174, 175, 176)
+#Question wise non responses on skilling questions ####
 
-a <- cbind.data.frame(Col_No = vec, Q_Name = colnames(AP_Youth_Survey)[vec])
+for (i in 1:nrow(AP_Youth_Survey)) {
+  
+  for (j in 1:ncol(AP_Youth_Survey)) {
+    
+    AP_Youth_Survey[i,j] <- ifelse(AP_Youth_Survey[i,j] == "NA", NA, AP_Youth_Survey[i,j])
+    
+  }
+  
+}
+
+vec <- c(119,121, 122, 123, 125, 127, 129, 130, 132, 133, 137, 138, 139, 150,151,152,153, 154, 156,158, 160, 162, 163, 165, 166, 167, 168, 169, 170, 174, 175, 176) + 1
+
+a <- cbind.data.frame(Col_No = as.numeric(vec), Q_Name = colnames(AP_Youth_Survey)[vec])
 
 No_Resp <- Tot_Resp <- rep(NA, nrow(a))
 
+
+
+
 for (i in 1:nrow(a)) {
+  
   t <- as.data.frame(table(AP_Youth_Survey[,a$Col_No[i]] == "No Response"))
   No_Resp[i] <- sum(t$Freq, na.rm = T) - t$Freq[t$Var1 == F]
   Tot_Resp[i] <- sum(t$Freq, na.rm = T)
+  
 }
 
 
 a <- cbind.data.frame(a, No_Resp, Tot_Resp)
 a$Non_Resp_Rate = round(100*a$No_Resp/a$Tot_Resp, 2)
 
+#Youth section non-responses - ####
 
+vec <- c(183:202)
+
+b <- cbind.data.frame(Col_No = as.numeric(vec), Q_Name = colnames(AP_Youth_Survey)[vec])
+
+No_Resp <- Tot_Resp <- rep(NA, nrow(b))
+
+
+
+
+for (i in 1:nrow(b)) {
+  
+  t <- as.data.frame(table(AP_Youth_Survey[,b$Col_No[i]] == "No Response"))
+  No_Resp[i] <- sum(t$Freq, na.rm = T) - t$Freq[t$Var1 == F]
+  Tot_Resp[i] <- sum(t$Freq, na.rm = T)
+  
+}
+
+
+b <- cbind.data.frame(b, No_Resp, Tot_Resp)
+b$Non_Resp_Rate = round(100*b$No_Resp/b$Tot_Resp, 2)
+
+b <- b[b$Tot_Resp >= 1561,]
 
 
 ##Enumerator-wise non responses
+
+
 
 v <- prop.table(table(AP_Youth_Survey$`Enumerator Code`, AP_Youth_Survey$`Andhra Pradesh now has many cash schemes to give money to its citizens, like Ammavodi and YSR Cheyutha. Do you believe the amount given in cash schemes should be more or less?` == "No Response"), 1)
 v <- as.data.frame(v); v <- v[v$Var2 != FALSE,]; v[,3] <- round(100*v[,3], 2)
