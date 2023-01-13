@@ -2,9 +2,7 @@ library(data.table)
 library(readxl)
 
 #Updated
-
 AP_Youth_Survey <- read_excel("youth_survey_responses (11th January).xlsx")
-
 
 AP_Youth_Survey <- youth_survey_responses
 
@@ -21,7 +19,7 @@ v <- c("GVMC(VISAKHAPATNAM)", "Gvmc visakhapatnam", "GVMC (VISAKHAPATNAM)", "Gvm
 AP_Youth_Survey$`City Name` <- ifelse(AP_Youth_Survey$`City Name` %in% v,
                                       "Visakhapatnam", AP_Youth_Survey$`City Name`)
 
-v <- c("Tirupathi", "tirupati", "Tirupati", "TIRUPATI")
+v <- c("Tirupathi", "tirupati", "Tirupati", "TIRUPATI", "1012")
 
 AP_Youth_Survey$`City Name` <- ifelse(AP_Youth_Survey$`City Name` %in% v,
                                       "Tirupati", AP_Youth_Survey$`City Name`)
@@ -34,7 +32,7 @@ AP_Youth_Survey$`City Name` <- ifelse(AP_Youth_Survey$`City Name` %in% v,
                                       "Tadipatri", AP_Youth_Survey$`City Name`)
 
 
-v <- c("KURNOOL", "Kurnool")
+v <- c("KURNOOL", "Kurnool", "kurnool")
 
 AP_Youth_Survey$`City Name` <- ifelse(AP_Youth_Survey$`City Name` %in% v,
                                       "Kurnool", AP_Youth_Survey$`City Name`)
@@ -45,7 +43,7 @@ AP_Youth_Survey$`City Name` <- ifelse(AP_Youth_Survey$`City Name` %in% v,
                                       "Kakinada", AP_Youth_Survey$`City Name`)
 
 
-v <- c("NELLORE", "Nellore", "21031019")
+v <- c("NELLORE", "Nellore", "21031019", "NELLLORE", "1031")
 
 AP_Youth_Survey$`City Name` <- ifelse(AP_Youth_Survey$`City Name` %in% v,
                                       "Nellore", AP_Youth_Survey$`City Name`)
@@ -63,7 +61,7 @@ AP_Youth_Survey$`City Name` <- ifelse(AP_Youth_Survey$`City Name` %in% v,
                                       "Kadiri", AP_Youth_Survey$`City Name`)
 
 
-v <- c("Hindupur", "Hindhupur", "Himdupur", "Hi")
+v <- c("Hindupur", "Hindhupur", "Himdupur", "Hi", "Hinduput")
 
 AP_Youth_Survey$`City Name` <- ifelse(AP_Youth_Survey$`City Name` %in% v,
                                       "Hindupur", AP_Youth_Survey$`City Name`)
@@ -78,6 +76,18 @@ v <- c("ELURU", "Eluru")
 
 AP_Youth_Survey$`City Name` <- ifelse(AP_Youth_Survey$`City Name` %in% v,
                                       "Eluru", AP_Youth_Survey$`City Name`)
+
+v <- c("Adoni", "ADONI")
+
+AP_Youth_Survey$`City Name` <- ifelse(AP_Youth_Survey$`City Name` %in% v,
+                                      "Adoni", AP_Youth_Survey$`City Name`)
+
+v <- c("Rajahmundry", "Rajamhundry", "Rajamundry")
+
+AP_Youth_Survey$`City Name` <- ifelse(AP_Youth_Survey$`City Name` %in% v,
+                                      "Rajahmundry", AP_Youth_Survey$`City Name`)
+
+
 
 
 ##Analysis
@@ -116,7 +126,7 @@ for (i in 1:nrow(AP_Youth_Survey)) {
   
 }
 
-vec <- c(119,121, 122, 123, 125, 127, 129, 130, 132, 133, 137, 138, 139, 150,151,152,153, 154, 156,158, 160, 162, 163, 165, 166, 167, 168, 169, 170, 174, 175, 176) + 1
+vec <- c(119,121, 122, 123, 125, 127, 129, 130, 132, 133, 137, 138, 139, 150,151,152,153, 154, 156,158, 160, 162, 163, 165, 166, 167, 168, 169, 170, 174, 175, 176)
 
 a <- cbind.data.frame(Col_No = as.numeric(vec), Q_Name = colnames(AP_Youth_Survey)[vec])
 
@@ -139,7 +149,7 @@ a$Non_Resp_Rate = round(100*a$No_Resp/a$Tot_Resp, 2)
 
 #Youth section non-responses - ####
 
-vec <- c(183:202)
+vec <- c(182:201)
 
 b <- cbind.data.frame(Col_No = as.numeric(vec), Q_Name = colnames(AP_Youth_Survey)[vec])
 
