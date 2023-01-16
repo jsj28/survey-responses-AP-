@@ -202,3 +202,13 @@ rownames(y) <- NULL
 y <- cbind.data.frame(x,y); y <- y[,c(1:2)]
 
 write_xlsx(y, "AP_Youth_Survey_Codebook.xlsx")
+
+
+
+#Adding Colnames and labels from Codebook
+AP_Youth_Survey_Codebook <- read_excel("AP_Youth_Survey_Codebook.xlsx")
+
+colnames(AP_Youth_Survey) <- AP_Youth_Survey_Codebook$Variable_Name
+attr(AP_Youth_Survey, "variable.labels") <- AP_Youth_Survey_Codebook$Column_Name
+
+
