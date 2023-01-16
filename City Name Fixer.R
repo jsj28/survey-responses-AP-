@@ -2,9 +2,9 @@ library(data.table)
 library(readxl)
 
 #Updated
-AP_Youth_Survey <- read_excel("youth_survey_responses (11th January).xlsx")
+AP_Youth_Survey <- read_excel("youth_survey_responses (final).xlsx")
 
-AP_Youth_Survey <- youth_survey_responses
+#AP_Youth_Survey <- youth_survey_responses
 
 v <- c("VIJAYAWADA", "VIJAYAWADa")
 
@@ -103,6 +103,18 @@ AP_Youth_Survey$`Ideally, which of the following type of work would you prefer?`
 
 table(AP_Youth_Survey$`Do you pay rent to live in this house?`)
 
+#NA Fixer Code Only if there are NAs manually written
+for (i in 1:nrow(AP_Youth_Survey)) {
+  
+  for (j in 1:ncol(AP_Youth_Survey)) {
+    
+    AP_Youth_Survey[i,j] <- ifelse(AP_Youth_Survey[i,j] == "NA", NA, AP_Youth_Survey[i,j])
+    
+  }
+  
+}
+
+
 #3 tables - students, employed, unemployed
 
 #93 - Identifier
@@ -116,15 +128,6 @@ table(AP_Youth_Survey$`Do you pay rent to live in this house?`)
 
 #Question wise non responses on skilling questions ####
 
-for (i in 1:nrow(AP_Youth_Survey)) {
-  
-  for (j in 1:ncol(AP_Youth_Survey)) {
-    
-    AP_Youth_Survey[i,j] <- ifelse(AP_Youth_Survey[i,j] == "NA", NA, AP_Youth_Survey[i,j])
-    
-  }
-  
-}
 
 vec <- c(119,121, 122, 123, 125, 127, 129, 130, 132, 133, 137, 138, 139, 150,151,152,153, 154, 156,158, 160, 162, 163, 165, 166, 167, 168, 169, 170, 174, 175, 176)
 
