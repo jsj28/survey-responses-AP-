@@ -37,10 +37,10 @@ library(readxl)
 
 ```{r}
 #Merging datasets
-ys_responses_1 <- read_excel("/Users/vaibhav/Documents/CPR\ -\ Work/AP\ Project/Youth_Survey_Andhra_Pradesh_Translated_30thNov_-_all_versions_-_English_en_-_2023-01-13-07-10-08.xlsx")
-ys_responses_2 <- read_excel("/Users/vaibhav/Documents/CPR\ -\ Work/AP\ Project/Youth_Survey_ANU_20thDec_Translated_-_all_versions_-_English_en_-_2023-01-13-07-12-11.xlsx")
+ys_responses_1 <- read_excel("/Users/vaibhav/Documents/CPR\ -\ Work/AP\ Project/Youth_Survey_Andhra_Pradesh_Translated_30thNov_-_all_versions_-_English_en_-_2023-01-13-19-13-07.xlsx")
+ys_responses_2 <- read_excel("/Users/vaibhav/Documents/CPR\ -\ Work/AP\ Project/Youth_Survey_ANU_20thDec_Translated_-_all_versions_-_English_en_-_2023-01-13-19-12-20.xlsx")
 
-ys_responses_3 <- read_excel("/Users/vaibhav/Documents/CPR\ -\ Work/AP\ Project/Youth_Survey_AU_21stDec_Translated_-_all_versions_-_English_en_-_2023-01-13-07-09-00.xlsx")
+ys_responses_3 <- read_excel("/Users/vaibhav/Documents/CPR\ -\ Work/AP\ Project/Youth_Survey_AU_21stDec_Translated_-_all_versions_-_English_en_-_2023-01-13-19-13-35.xlsx")
 
 ys1 <- colnames(ys_responses_1)
 ys2 <- colnames(ys_responses_2)
@@ -54,7 +54,7 @@ youth_survey_responses <- rbind(ys_responses_1, ys_responses_2, ys_responses_3)
 
 ys4 <- colnames(youth_survey_responses)
 
-write.table(youth_survey_responses, "/Users/gurkirat/Desktop/youth_survey_responses (11th January).txt", sep = "\t")
+write.table(youth_survey_responses, "youth_survey_responses (11th January).txt", sep = "\t")
 ```
 
 ```{r}
