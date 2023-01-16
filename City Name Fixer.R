@@ -188,3 +188,17 @@ colnames(v)[3] <- "Cash_Support"
 
 
 v <- prop.table(table(AP_Youth_Survey[,vec[1]], AP_Youth_Survey$`Enumerator Code`))
+
+
+
+#Add Codebook - 
+x <- colnames(AP_Youth_Survey)
+y <- as.data.frame(sapply(AP_Youth_Survey, class))
+
+y <- as.data.frame(t(y))
+
+rownames(y) <- NULL
+
+y <- cbind.data.frame(x,y); y <- y[,c(1:2)]
+
+write_xlsx(y, "AP_Youth_Survey_Codebook.xlsx")
