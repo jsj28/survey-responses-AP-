@@ -1,8 +1,20 @@
 library(data.table)
 library(readxl)
+library(writexl)
+
 
 #Updated
 AP_Youth_Survey <- read_excel("youth_survey_responses (final).xlsx")
+
+#Adding Colnames and labels from Codebook
+AP_Youth_Survey_Codebook <- read_excel("AP_Youth_Survey_Codebook.xlsx")
+
+colnames(AP_Youth_Survey) <- AP_Youth_Survey_Codebook$Variable_Name
+attr(AP_Youth_Survey, "variable.labels") <- AP_Youth_Survey_Codebook$Column_Name
+
+
+
+
 
 #AP_Youth_Survey <- youth_survey_responses
 
@@ -87,11 +99,14 @@ v <- c("Rajahmundry", "Rajamhundry", "Rajamundry")
 AP_Youth_Survey$`City Name` <- ifelse(AP_Youth_Survey$`City Name` %in% v,
                                       "Rajahmundry", AP_Youth_Survey$`City Name`)
 
+AP_Youth_Survey$`City Name` <- ifelse(AP_Youth_Survey$`City Name` == "KADAPA",
+                                      "Kadapa", AP_Youth_Survey$`City Name`)
+
 
 
 
 ##Analysis
-table(AP_Youth_Survey$`City Name`)
+as.data.frame(table(AP_Youth_Survey$`City Name`))
 #Analysis
 AP_Youth_Survey$`Ideally, which of the following type of work would you prefer?`
 
@@ -131,7 +146,7 @@ for (i in 1:nrow(AP_Youth_Survey)) {
 
 vec <- c(119,121, 122, 123, 125, 127, 129, 130, 132, 133, 137, 138, 139, 150,151,152,153, 154, 156,158, 160, 162, 163, 165, 166, 167, 168, 169, 170, 174, 175, 176)
 
-a <- cbind.data.frame(Col_No = as.numeric(vec), Q_Name = colnames(AP_Youth_Survey)[vec])
+a <- cbind.data.frame(Col_No = as.numeric(vec), Var_Codes = colnames(AP_Youth_Survey)[vec], Q_Name = AP_Youth_Survey_Codebook$Column_Name[vec])
 
 No_Resp <- Tot_Resp <- rep(NA, nrow(a))
 
@@ -154,7 +169,7 @@ a$Non_Resp_Rate = round(100*a$No_Resp/a$Tot_Resp, 2)
 
 vec <- c(182:201)
 
-b <- cbind.data.frame(Col_No = as.numeric(vec), Q_Name = colnames(AP_Youth_Survey)[vec])
+b <- cbind.data.frame(Col_No = as.numeric(vec), Var_Codes = colnames(AP_Youth_Survey)[vec], Q_Name = AP_Youth_Survey_Codebook$Column_Name[vec])
 
 No_Resp <- Tot_Resp <- rep(NA, nrow(b))
 
@@ -173,7 +188,7 @@ for (i in 1:nrow(b)) {
 b <- cbind.data.frame(b, No_Resp, Tot_Resp)
 b$Non_Resp_Rate = round(100*b$No_Resp/b$Tot_Resp, 2)
 
-b <- b[b$Tot_Resp >= 1561,]
+b <- b[b$Tot_Resp >= 1630,]
 
 
 ##Enumerator-wise non responses
@@ -203,12 +218,5 @@ y <- cbind.data.frame(x,y); y <- y[,c(1:2)]
 
 write_xlsx(y, "AP_Youth_Survey_Codebook.xlsx")
 
-
-
-#Adding Colnames and labels from Codebook
-AP_Youth_Survey_Codebook <- read_excel("AP_Youth_Survey_Codebook.xlsx")
-
-colnames(AP_Youth_Survey) <- AP_Youth_Survey_Codebook$Variable_Name
-attr(AP_Youth_Survey, "variable.labels") <- AP_Youth_Survey_Codebook$Column_Name
 
 
