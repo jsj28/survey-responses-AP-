@@ -4,17 +4,59 @@ library(writexl)
 
 
 #Updated
-AP_Youth_Survey <- read_excel("youth_survey_responses (final).xlsx")
+AP_Youth_Survey <- read_excel("/Users/gurkirat/Downloads/Archive/youth_survey_responses (final 14th Jan).xlsx")
+ap_outmigration_roster <- read_excel("/Users/gurkirat/Downloads/Archive/Outmigration Roster Youth Survey (Final 14th Jan).xlsx")
+ap_household_roster  <- read_excel("/Users/gurkirat/Downloads/Archive/Household Roster Youth Survey (Final 14th Jan).xlsx")
+
+#Add Codebook: youth questions
+x <- colnames(AP_Youth_Survey)
+y <- as.data.frame(sapply(AP_Youth_Survey, class))
+
+y <- as.data.frame(t(y))
+
+rownames(y) <- NULL
+
+y <- cbind.data.frame(x,y); y <- y[,c(1:2)]
+
+write_xlsx(y, "AP_Youth_Survey_Codebook.xlsx")
+
+#household roster
+
+h <- colnames(ap_household_roster)
+hh <- as.data.frame(sapply(ap_household_roster, class))
+
+hh <- as.data.frame(t(hh))
+
+rownames(hh) <- NULL
+
+hh <- cbind.data.frame(h,hh); hh <- hh[,c(1:2)]
+
+write_xlsx(hh, "AP_household_roster codebook.xlsx")
+
+#outmigration roster
+o <- colnames(ap_outmigration_roster)
+oo <- as.data.frame(sapply(ap_outmigration_roster, class))
+
+oo <- as.data.frame(t(oo))
+
+rownames(oo) <- NULL
+
+oo <- cbind.data.frame(o,oo); oo <- oo[,c(1:2)]
+
+write_xlsx(oo, "AP_outmigration_roster codebook.xlsx")
 
 #Adding Colnames and labels from Codebook
 AP_Youth_Survey_Codebook <- read_excel("AP_Youth_Survey_Codebook.xlsx")
-
 colnames(AP_Youth_Survey) <- AP_Youth_Survey_Codebook$Variable_Name
 attr(AP_Youth_Survey, "variable.labels") <- AP_Youth_Survey_Codebook$Column_Name
 
+AP_household_roster_codebook <- read_excel("/Users/gurkirat/Downloads/Archive/AP_household_roster codebook.xlsx")
+colnames(ap_household_roster) <- AP_household_roster_codebook$Variable_Name
+attr(ap_household_roster, "variable.labels") <- AP_household_roster_codebook$Column_Name
 
-
-
+AP_outmigration_roster_codebook <- read_excel("/Users/gurkirat/Downloads/Archive/AP_outmigration_roster codebook.xlsx")
+colnames(ap_outmigration_roster) <- AP_outmigration_roster_codebook$Variable_Name
+attr(ap_outmigration_roster, "variable.labels") <- AP_outmigration_roster_codebook$Column_Name
 
 #AP_Youth_Survey <- youth_survey_responses
 
@@ -205,18 +247,6 @@ colnames(v)[3] <- "Cash_Support"
 v <- prop.table(table(AP_Youth_Survey[,vec[1]], AP_Youth_Survey$`Enumerator Code`))
 
 
-
-#Add Codebook - 
-x <- colnames(AP_Youth_Survey)
-y <- as.data.frame(sapply(AP_Youth_Survey, class))
-
-y <- as.data.frame(t(y))
-
-rownames(y) <- NULL
-
-y <- cbind.data.frame(x,y); y <- y[,c(1:2)]
-
-write_xlsx(y, "AP_Youth_Survey_Codebook.xlsx")
 
 
 
