@@ -1,0 +1,46 @@
+---
+title: "AP Youth Survey"
+author: "Vaibhav Parik"
+date: "2023-01-19"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(data.table)
+library(readxl)
+library(writexl)
+
+```
+
+
+### List of flags encountered so far
+
+1. The absence of certain self respondents - We need face page reference back for this, 1 and 2(b) in next section.
+2. Employment - there are certain cases where unemployed people have been counted as employed
+We see that there's a large chunk of population that has been classified as employed based on the roster, but is unemployed in the main survey. Most of these responses seem to be from those engaged in casual/daily labour or self-employed, with unpaid family worker next in line
+
+3. The skilling questions - we do see little movement from those who have not taken skilling courses/workshops in their willingness to take them in the future. 
+
+4. 5 cases where enumerator IDs have been entered for Respondent IDs
+
+
+### Questions and concerns about what to do next
+1. Running a sample crosscheck with GSWS data to see data quality and check consistency?
+
+2. Other internal data checks could include - 
+  a. Any disparities between respondent occupation and industry mentioned in the roster/survey responses (To do for Gurkirat)
+  b. Age of those classified as children in roster (16 cases), but no way to know which would be self here
+  c. Marital status and children crosscheck - are there a lot of children? (To do for Gurkirat)
+  
+Overall- Look at errors of enumerator IDs
+
+
+### Other tasks
+
+1. Recode string variable values across the survey and roster
+2. Merge response to skilling questions into one column, so far separated by response on primary activity
+
+
+
+
