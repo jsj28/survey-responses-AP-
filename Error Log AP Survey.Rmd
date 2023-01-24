@@ -11,35 +11,113 @@ library(data.table)
 library(readxl)
 library(writexl)
 
+#Main Files ####
+AP_Youth_Survey <- read_excel("youth_survey_responses (23rd Jan).xlsx")
+AP_Household_Roster <- read_excel("Household Roster Youth Survey (23rd Jan).xlsx")
+AP_Outmigration_Roster <- read_excel("Outmigration Roster Youth Survey (23rd Jan).xlsx")
+
+
+#Codebooks ####
+AP_Youth_Survey_Codebook <- read_excel("AP_Youth_Survey_Codebook.xlsx")
+colnames(AP_Youth_Survey) <- AP_Youth_Survey_Codebook$Variable_Name
+attr(AP_Youth_Survey, "variable.labels") <- AP_Youth_Survey_Codebook$Column_Name
+
+AP_Household_Roster_Codebook <- read_excel("AP_Youth_Survey_Codebook.xlsx", sheet = 2)
+colnames(AP_Household_Roster) <- AP_Household_Roster_Codebook$Variable_Name
+attr(AP_Household_Roster, "variable.labels") <- AP_Household_Roster_Codebook$Column_Name
+
+AP_Outmigration_Roster_Codebook <- read_excel("AP_Youth_Survey_Codebook.xlsx", sheet = 3)
+colnames(AP_Outmigration_Roster) <- AP_Outmigration_Roster_Codebook$Variable_Name
+attr(AP_Outmigration_Roster, "variable.labels") <- AP_Outmigration_Roster_Codebook$Column_Name
+
 ```
 
 
 ### List of flags encountered so far
 
-1. The absence of certain self respondents - We need face page reference back for this, 1 and 2(b) in next section.
-2. Employment - there are certain cases where unemployed people have been counted as employed
-We see that there's a large chunk of population that has been classified as employed based on the roster, but is unemployed in the main survey. Most of these responses seem to be from those engaged in casual/daily labour or self-employed, with unpaid family worker next in line
+#### 1. Absence of Self Respondents
 
-3. The skilling questions - we do see little movement from those who have not taken skilling courses/workshops in their willingness to take them in the future. 
+We found that there are certain surveys which do not have any member of the household identified as the true respondent. According to the data by Jan 23, there are 21 such households. In total, there are about 64 respondents, once we remove children below 19, among which there are 21 true respondents who need to be identified through the face pages. Details on the same from the roster can be found below, and these have been merged with the main survey too. 
 
-4. 5 cases where enumerator IDs have been entered for Respondent IDs
+Face page references are also needed for 1 and 2(b) in the next section##
+
+```{r, echo=FALSE}
+#Non Self data file
+v <- AP_Youth_Survey$`_uuid`[(AP_Youth_Survey$`_uuid` %in% AP_Household_Roster$`_submission__uuid`[AP_Household_Roster$H_1 == "Self"]) == F]
+
+AP_Household_Roster$H_1[AP_Household_Roster$`_submission__uuid` %in% v]
+
+AP_Household_NonSelf <- AP_Household_Roster[AP_Household_Roster$`_submission__uuid` %in% v,]
+AP_Household_NonSelf <- AP_Household_NonSelf[AP_Household_NonSelf$Age > 18,]
 
 
-### Questions and concerns about what to do next
-1. Running a sample crosscheck with GSWS data to see data quality and check consistency?
-
-2. Other internal data checks could include - 
-  a. Any disparities between respondent occupation and industry mentioned in the roster/survey responses (To do for Gurkirat)
-  b. Age of those classified as children in roster (16 cases), but no way to know which would be self here
-  c. Marital status and children crosscheck - are there a lot of children? (To do for Gurkirat)
+for(i in 1:nrow(AP_Household_NonSelf)) {
   
-Overall- Look at errors of enumerator IDs
+  AP_Household_NonSelf[i,c(39:50)] = AP_Youth_Survey[AP_Youth_Survey$`_uuid` == AP_Household_NonSelf$`_submission__uuid`[i], c(1:12)]
+  
+}
+
+head(AP_Household_NonSelf[,c(1:8)])
 
 
-### Other tasks
+```
 
-1. Recode string variable values across the survey and roster
-2. Merge response to skilling questions into one column, so far separated by response on primary activity
+#### 2. Enumerator IDs entered as Respondent IDs
+
+There are certain cases were it seems enumerator IDs have mistakenly been entered as respondent IDs. Given the last digit of the respondent ID is restricted to being less than 5, and the overall number should not exceed beyond 2100, we flagged certain IDs which were irregular. Upon crosschecking it seemed they were indeed enumerator IDs, and we are sharing a table of such IDs and the number of such responses below. 
+
+```{r, echo = FALSE}
+
+table(AP_Youth_Survey$`Enumerator Code`[AP_Youth_Survey$`Enumerator Code` == AP_Youth_Survey$`Respondent ID`])
+
+```
+
+
+#### 3. Misclassification of Adults as Children
+
+There are about 16 cases where adults above the age of 19 have been entered as children. These are shown below. While they may all not necessarily be the respondent, these people need to be reclassified based on face pages.
+
+```{r, echo = F}
+
+Child_MisClass <- AP_Household_Roster[AP_Household_Roster$Age > 19 & AP_Household_Roster$H_1 == "Child",]
+
+Child_MisClass[,c(1:8)]
+```
+
+#### 4. Marital Status of Children - Gurkirat
+
+Marital status and children crosscheck - are there a lot of children?
+
+
+#### 5. Disparities between Sector and Roster Occupation - Gurkirat
+
+Any disparities between respondent occupation and industry mentioned in the roster/survey responses
+
+
+Overall- Look at errors by enumerator IDs
+
+### Analysis Observations from the Sample
+
+#### 1. Capturing Seasonal and Long Term Employment
+
+Roster captures - seasonal. 
+Main Survey captures long term
+There are certain cases where unemployed people have been counted as employed. We see that there's a large chunk of population that has been classified as employed based on the roster, but is unemployed in the main survey. Most of these responses seem to be from those engaged in casual/daily labour or self-employed, with unpaid family worker next in line
+
+
+#### 2. Inertia on willingness for skill development
+The skilling questions - we do see little movement from those who have not taken skilling courses/workshops in their willingness to take them in the future. 
+
+
+  
+
+
+### Potential Next Steps
+
+1. Running a sample crosscheck with GSWS data to see data quality and check consistency? - Neelan to take session
+2. Recode string variable values across the survey and roster
+3. Merge response to skilling questions into one column, so far separated by response on primary activity
+4. Other internal data checks could include?
 
 
 
