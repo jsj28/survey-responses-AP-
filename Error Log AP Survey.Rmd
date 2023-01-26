@@ -111,6 +111,34 @@ The skilling questions - we do see little movement from those who have not taken
 
   
 
+### Analysis to be replicated from Partha’s slides 
+1. Education of Children to Parent’s education - Breakdown by male and female (Comparison with PLFS) - Vaibhav
+2. AP youth is not growing up in a cushy environment - Asset ownership - Gurkirat
+
+
+### Sectionwise Analysis to be added
+#### A
+Gurkirat
+1. Religion, Gender and Caste breakdown
+
+
+#### E
+Vaibhav
+1. Scheme based benefit receipts & Credit attribution (Clean Y_E_75 and associated q)
+
+
+#### F
+Vaibhav
+1. Primary Activity - Employment Distribution (Primary Activity) - 19-29 and 30+ (across gender)
+2. Skilling - Have you taken any course, Would any course be beneficial, If yes, do you intend to take it? - Collapse them into 3 columns from 9
+
+
+
+#### G 
+Gurkirat
+All four questions to be done
+
+
 
 ### Potential Next Steps
 
@@ -118,7 +146,3 @@ The skilling questions - we do see little movement from those who have not taken
 2. Recode string variable values across the survey and roster
 3. Merge response to skilling questions into one column, so far separated by response on primary activity
 4. Other internal data checks could include?
-
-
-
-
