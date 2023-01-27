@@ -4,9 +4,9 @@ library(readxl)
 library(writexl)
 
 #Main Files ####
-AP_Youth_Survey <- read_excel("youth_survey_responses (23rd Jan).xlsx")
-AP_Household_Roster <- read_excel("Household Roster Youth Survey (23rd Jan).xlsx")
-AP_Outmigration_Roster <- read_excel("Outmigration Roster Youth Survey (23rd Jan).xlsx")
+AP_Youth_Survey <- read_excel("youth_survey_responses (27th Jan).xlsx")
+AP_Household_Roster <- read_excel("Household Roster Youth Survey (27th Jan).xlsx")
+AP_Outmigration_Roster <- read_excel("Outmigration Roster Youth Survey (27th Jan).xlsx")
 
 
 #Codebooks ####
@@ -50,7 +50,7 @@ AP_Youth_Survey$`City Name` <- ifelse(AP_Youth_Survey$`City Name` %in% v,
                                       "Tadipatri", AP_Youth_Survey$`City Name`)
 
 
-v <- c("KURNOOL", "Kurnool", "kurnool", "Kurnnol")
+v <- c("KURNOOL", "Kurnool", "kurnool", "Kurnnol", "1016")
 
 AP_Youth_Survey$`City Name` <- ifelse(AP_Youth_Survey$`City Name` %in% v,
                                       "Kurnool", AP_Youth_Survey$`City Name`)
@@ -105,11 +105,13 @@ v <- c("Rajahmundry", "Rajamhundry", "Rajamundry", "RAJAHMUNDRY")
 AP_Youth_Survey$`City Name` <- ifelse(AP_Youth_Survey$`City Name` %in% v,
                                       "Rajahmundry", AP_Youth_Survey$`City Name`)
 
-AP_Youth_Survey$`City Name` <- ifelse(AP_Youth_Survey$`City Name` == "KADAPA",
+AP_Youth_Survey$`City Name` <- ifelse(AP_Youth_Survey$`City Name` == "KADAPA" | AP_Youth_Survey$`City Name` == "R NARASIMHA SAPTAGIRI",
                                       "Kadapa", AP_Youth_Survey$`City Name`)
 
+AP_Youth_Survey$`City Name` <- ifelse(AP_Youth_Survey$`City Name` == "PEDDHAPURAM",
+                                      "Peddapuram", AP_Youth_Survey$`City Name`)
 
-write_xlsx(AP_Youth_Survey, "youth_survey_responses (23rd Jan).xlsx")
+write_xlsx(AP_Youth_Survey, "youth_survey_responses (27th Jan).xlsx")
 
 City_Wise_Numbers <- as.data.frame(table(AP_Youth_Survey$`City Name`))
 
@@ -143,4 +145,92 @@ write_xlsx(AP_Household_NonSelf, "AP_Household_NonSelf_Responses.xlsx")
 AP_Youth_Survey_Merged <- merge(AP_Youth_Survey, AP_Household_Roster[AP_Household_Roster$H_1 == "Self",], by.x = c("_uuid"), by.y = c("_submission__uuid"))
 attr(AP_Youth_Survey_Merged, "variable.labels") <- c(AP_Youth_Survey_Codebook$Column_Name, AP_Household_Roster_Codebook$Column_Name[AP_Household_Roster_Codebook$Column_Name != "_submission__uuid"])
 
-write_xlsx(AP_Youth_Survey_Merged, "AP_YouthSurvey_Roster_Merged (Jan 23rd).xlsx")
+write_xlsx(AP_Youth_Survey_Merged, "AP_YouthSurvey_Roster_Merged (Jan 27th).xlsx")
+
+
+#Tables to be created - A (Skilling Response Levels) ####
+
+vec <- c(119,121, 122, 123, 125, 127, 129, 130, 132, 133, 137, 138, 139, 150,151,152,153, 154, 156,158, 160, 162, 163, 165, 166, 167, 168, 169, 170, 174, 175, 176)
+
+a <- cbind.data.frame(Col_No = as.numeric(vec), Var_Codes = colnames(AP_Youth_Survey)[vec], Q_Name = AP_Youth_Survey_Codebook$Column_Name[vec])
+
+No_Resp <- Tot_Resp <- rep(NA, nrow(a))
+
+
+
+
+for (i in 1:nrow(a)) {
+  
+  t <- as.data.frame(table(AP_Youth_Survey[,a$Col_No[i]] == "No Response"))
+  No_Resp[i] <- sum(t$Freq, na.rm = T) - t$Freq[t$Var1 == F]
+  Tot_Resp[i] <- sum(t$Freq, na.rm = T)
+  
+}
+
+
+a <- cbind.data.frame(a, No_Resp, Tot_Resp)
+a$Non_Resp_Rate = round(100*a$No_Resp/a$Tot_Resp, 2)
+
+#Table B - Youth section non-responses - ####
+
+vec <- c(182:201)
+
+#Add welfare matters - who do they hold responsible
+
+b <- cbind.data.frame(Col_No = as.numeric(vec), Var_Codes = colnames(AP_Youth_Survey)[vec], Q_Name = AP_Youth_Survey_Codebook$Column_Name[vec])
+
+No_Resp <- Tot_Resp <- rep(NA, nrow(b))
+
+
+
+
+for (i in 1:nrow(b)) {
+  
+  t <- as.data.frame(table(AP_Youth_Survey[,b$Col_No[i]] == "No Response"))
+  No_Resp[i] <- sum(t$Freq, na.rm = T) - t$Freq[t$Var1 == F]
+  Tot_Resp[i] <- sum(t$Freq, na.rm = T)
+  
+}
+
+
+b <- cbind.data.frame(b, No_Resp, Tot_Resp)
+b$Non_Resp_Rate = round(100*b$No_Resp/b$Tot_Resp, 2)
+
+b <- b[b$Tot_Resp >= 1630,]
+
+
+#Table C - Scheme based responses ####
+#Scheme-Wise Receipts
+Neg_Resp <- c("No", "Don't Know", "Don't know")
+
+vec <- c(62, 67, 72, 77, 82) + 1
+
+c <- cbind.data.frame(Col_No = as.numeric(vec), Var_Codes = colnames(AP_Youth_Survey_Merged)[vec], Q_Name = AP_Youth_Survey_Codebook$Column_Name[vec - 1])
+
+Yes_Resp <- Tot_Resp <- rep(NA, length(vec))
+
+for (i in 1:nrow(c)) {
+  
+  t <- as.data.frame(table(AP_Youth_Survey_Merged[,c$Col_No[i]] %in% Neg_Resp))
+  Yes_Resp[i] <- t$Freq[t$Var1 == F]
+  Tot_Resp[i] <- sum(t$Freq, na.rm = T)
+  
+  
+}
+
+c <- cbind.data.frame(c, Yes_Resp, Tot_Resp)
+c$Benefit_Rate = round(100*c$Yes_Resp/c$Tot_Resp, 2)
+
+
+#Combining Skill Question Columns 
+#In main survey
+AP_Youth_Survey$YR_F_87 <- ifelse(AP_Youth_Survey$Y_F_81 == "Student", AP_Youth_Survey$Y_F_87,
+                                  ifelse(AP_Youth_Survey$Y_F_81 == "Employed", AP_Youth_Survey$Y_F_123, AP_Youth_Survey$Y_F_160))
+
+AP_Youth_Survey$YR_F_92 <- ifelse(AP_Youth_Survey$Y_F_81 == "Student", AP_Youth_Survey$Y_F_92,
+                                  ifelse(AP_Youth_Survey$Y_F_81 == "Employed", AP_Youth_Survey$Y_F_128, AP_Youth_Survey$Y_F_165))
+
+AP_Youth_Survey$YR_F_94 <- ifelse(AP_Youth_Survey$Y_F_81 == "Student", AP_Youth_Survey$Y_F_94,
+                                  ifelse(AP_Youth_Survey$Y_F_81 == "Employed", AP_Youth_Survey$Y_F_130, AP_Youth_Survey$Y_F_167))
+
+  
