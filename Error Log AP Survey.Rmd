@@ -41,6 +41,10 @@ library(data.table)
 library(foreign)
 library(readxl)
 
+##Plot theme
+newtheme <- theme_bw() +
+  theme(panel.border = element_rect(color = "darkgrey", size = 2), 
+        panel.grid.major = element_blank(), legend.position = "bottom")
 
 #Main Files ####
 AP_Youth_Survey <- read_excel("/Users/gurkirat/Desktop/Archive-2/youth_survey_responses (27th Jan).xlsx")
@@ -215,7 +219,7 @@ Gurkirat
 1. Religion, Gender and Caste breakdown
 
 ```{r}
-##Composition of households
+##Household Composition
 ch <- as.data.frame (table(AP_Household_Roster$H_1)) %>% 
 rename("Relationship with the respondent" = Var1) %>% 
 rename ("Count" = Freq) %>% 
@@ -226,20 +230,135 @@ ch %>%
 kbl(caption = "Composition of households")%>%
   kable_classic(full_width = F, html_font = "Cambria", font_size = 15)
 
-##Gender Disaggregation of youth respondent and other members of the household (Household Roster)
-g1 <- as.data.frame(table(AP_Household_Roster$Gender[AP_Household_Roster$H_1 == "Self"]))
+##Youth respondent disaggregated by Gender
+g1 <- as.data.frame(table(AP_Household_Roster$Gender[AP_Household_Roster$H_1 == "Self"])) %>% 
+mutate (Proportions = Freq*100/sum(Freq)) %>% 
+rename ("Gender" = Var1) %>% 
+rename ("Count" = Freq)
 
-#Male respondents: 960; Women Respondents: 999
+#Male respondents: 960 (49%); Women Respondents: 999 (51%)
 #Note: 21 self-respondents wrongly marked 
 
+##Other members of the household (Household Roster) disaggregated by Gender
+g2 <- as.data.frame(table(AP_Household_Roster$Gender[AP_Household_Roster$H_1 == "Brother" | AP_Household_Roster$H_1 == "Child" | AP_Household_Roster$H_1 == "Father" | AP_Household_Roster$H_1 == "Father-in-law"  | AP_Household_Roster$H_1 == "Grandfather" | AP_Household_Roster$H_1 == "Grandmother" | AP_Household_Roster$H_1 == "Husband" | AP_Household_Roster$H_1 == "Mother" |AP_Household_Roster$H_1 == "Mother-in-law"|AP_Household_Roster$H_1 == "Non-Relatives (guests, servants, help, etc.)" | AP_Household_Roster$H_1 == "Other Relatives"| AP_Household_Roster$H_1 == "Other-in-laws"| AP_Household_Roster$H_1 == "Sister"| AP_Household_Roster$H_1 == "Uncle/Aunt"| AP_Household_Roster$H_1 == "Wife"])) %>% 
+mutate (Proportions = Freq*100/sum(Freq)) %>% 
+rename ("Gender" = Var1) %>% 
+rename ("Count" = Freq)
 
-g2 <- as.data.frame(table(AP_Household_Roster$Gender[AP_Household_Roster$H_1 == "Brother" | AP_Household_Roster$H_1 == "Child" | AP_Household_Roster$H_1 == "Father" | AP_Household_Roster$H_1 == "Father-in-law"  | AP_Household_Roster$H_1 == "Grandfather" | AP_Household_Roster$H_1 == "Grandmother" | AP_Household_Roster$H_1 == "Husband" | AP_Household_Roster$H_1 == "Mother" |AP_Household_Roster$H_1 == "Mother-in-law"|AP_Household_Roster$H_1 == "Non-Relatives (guests, servants, help, etc.)" | AP_Household_Roster$H_1 == "Other Relatives"| AP_Household_Roster$H_1 == "Other-in-laws"| AP_Household_Roster$H_1 == "Sister"| AP_Household_Roster$H_1 == "Uncle/Aunt"| AP_Household_Roster$H_1 == "Wife"]))
+#Male Members:
+```
+
+Government Caste Categories (by household)
+```{r}
+##Government Caste Categories (by household)
+caste <- as.data.frame(table(AP_Youth_Survey$Y_A_15)) %>% 
+mutate (Proportions = round(Freq*100/sum(Freq),1)) %>% 
+rename ("Household Caste Category" = Var1) %>% 
+rename ("Count" = Freq)
 
 
+caste_plot <- ggplot(caste, aes(x= `Household Caste Category`, y= Proportions, fill = `Household Caste Category`)) +
+  geom_bar(stat="identity", width= 0.5, show.legend = FALSE) + 
+  geom_text (aes(label = Proportions), position = position_dodge(0.1), vjust = -1) + scale_y_continuous(limits = c(0,70)) +
+  scale_x_discrete(labels = function(`Household Caste Category`) str_wrap(`Household Caste Category`, width = 10)) +
+  scale_fill_brewer(palette="YlGnBu") +
+  labs(x="",y="Percentage", subtitle = "Government Caste Category of households") + newtheme
 
+caste_plot
+```
+
+```{r}
+##Religion of Households
+religion <- as.data.frame(table(AP_Youth_Survey$Y_A_13)) %>% 
+mutate (Proportions = round(Freq*100/sum(Freq),1)) %>% 
+rename ("Religion of Household" = Var1) %>% 
+rename ("Count" = Freq) 
+
+religion_plot <- ggplot(religion, aes(x= `Religion of Household`, y= Proportions, fill = `Religion of Household`)) +
+  geom_bar(stat="identity", width= 0.5, show.legend = FALSE) + 
+  geom_text (aes(label = Proportions), position = position_dodge(0.1), vjust = -1) +
+  scale_y_continuous(limits = c(0,80)) +
+  scale_x_discrete(labels = function(`Religion of Household`) str_wrap(`Religion of Household`, width = 10)) +
+  scale_fill_brewer(palette="YlGnBu") +
+  labs(x="",y="Percentage", subtitle = "Religion of Household") + newtheme
+
+religion_plot
 ```
 
 
+Youth Questions: 
+Q. Do you think your economic fortunes will be better or worse than your parents? (Y_G_186)
+```{r}
+##Y_G_186
+Y_G_186 <- as.data.frame(table(AP_Youth_Survey$Y_G_186)) %>% 
+mutate (Proportions = round(Freq*100/sum(Freq),1)) %>% 
+rename ("Response" = Var1) %>% 
+rename ("Count" = Freq) 
+
+Y_G_186_plot <- ggplot(Y_G_186, aes(x= Response, y= Proportions, fill = Response)) +
+  geom_bar(stat="identity", width= 0.5, show.legend = FALSE) + 
+  geom_text (aes(label = Proportions), position = position_dodge(0.1), vjust = -1) +
+  scale_y_continuous(limits = c(0,80)) +
+  scale_x_discrete(labels = function(`Response`) str_wrap(`Response`, width = 10)) +
+  scale_fill_brewer(palette="YlGnBu") +
+  labs(x="",y="Percentage", subtitle = "Do you think your economic fortunes will be better or worse than your parents?") + newtheme
+
+Y_G_186_plot
+
+```
+Q. In the past 5 years, compared to other states in India, do you believe citizens of Andhra Pradesh have done better or worse? (Y_G_187)
+```{r, echo = FALSE, fig.height=5,fig.width=9, warning=FALSE}
+##Y_G_187
+Y_G_187 <- as.data.frame(table(AP_Youth_Survey$Y_G_187)) %>% 
+mutate (Proportions = round(Freq*100/sum(Freq),1)) %>% 
+rename ("Response" = Var1) %>% 
+rename ("Count" = Freq) 
+
+Y_G_187_plot <- ggplot(Y_G_187, aes(x= Response, y= Proportions, fill = Response)) +
+  geom_bar(stat="identity", width= 0.5, show.legend = FALSE) + 
+  geom_text (aes(label = Proportions), position = position_dodge(0.1), vjust = -1) +
+  scale_y_continuous(limits = c(0,80)) +
+  scale_x_discrete(labels = function(`Response`) str_wrap(`Response`, width = 10)) +
+  scale_fill_brewer(palette="YlGnBu") +
+  labs(x="",y="Percentage", subtitle = "In the past 5 years, compared to other states in India, do you believe citizens of Andhra Pradesh have done better or worse?") + newtheme
+
+Y_G_187_plot
+```
+Q. Andhra Pradesh now has many cash schemes to give money to its citizens, like Ammavodi and YSR Cheyutha. Do you believe the amount given in cash schemes should be more or less? (Y_G_188)
+```{r}
+Y_G_188 <- as.data.frame(table(AP_Youth_Survey$Y_G_188)) %>% 
+mutate (Proportions = round(Freq*100/sum(Freq),1)) %>% 
+rename ("Response" = Var1) %>% 
+rename ("Count" = Freq) 
+
+Y_G_188_plot <- ggplot(Y_G_188, aes(x= Response, y= Proportions, fill = Response)) +
+  geom_bar(stat="identity", width= 0.5, show.legend = FALSE) + 
+  geom_text (aes(label = Proportions), position = position_dodge(0.1), vjust = -1) +
+  scale_y_continuous(limits = c(0,80)) +
+  scale_x_discrete(labels = function(`Response`) str_wrap(`Response`, width = 10)) +
+  scale_fill_brewer(palette="YlGnBu") +
+  labs(x="",y="Percentage", subtitle = "Do you believe the amount given in cash schemes should be more or less?") + newtheme
+
+Y_G_188_plot
+
+```
+Q. Do you believe democracy in India is getting stronger or weaker? (Y_G_189)
+```{r}
+Y_G_189 <- as.data.frame(table(AP_Youth_Survey$Y_G_189)) %>% 
+mutate (Proportions = round(Freq*100/sum(Freq),1)) %>% 
+rename ("Response" = Var1) %>% 
+rename ("Count" = Freq) 
+
+Y_G_189_plot <- ggplot(Y_G_189, aes(x= Response, y= Proportions, fill = Response)) +
+  geom_bar(stat="identity", width= 0.5, show.legend = FALSE) + 
+  geom_text (aes(label = Proportions), position = position_dodge(0.1), vjust = -1) +
+  scale_y_continuous(limits = c(0,80)) +
+  scale_x_discrete(labels = function(`Response`) str_wrap(`Response`, width = 10)) +
+  scale_fill_brewer(palette="YlGnBu") +
+  labs(x="",y="Percentage", subtitle = "Do you believe democracy in India is getting stronger or weaker?") + newtheme
+
+Y_G_189_plot
+```
 
 #### E
 Vaibhav
