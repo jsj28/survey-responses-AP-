@@ -15,12 +15,37 @@ knitr::opts_chunk$set(echo = TRUE)
 library(data.table)
 library(readxl)
 library(writexl)
+library(haven)
+library(readr)
+library(dplyr)
+library(cowplot)
+library(tidyverse)
+library(ggplot2)
+library(MASS)
+library(ggrepel)
+library(RColorBrewer)
+library(stargazer)
+library(DeclareDesign)
+library(texreg)
+library(car)
+library(lubridate)
+library(scales)
+library(cowplot)
+library(writexl)
+library(janitor)
+library(gridExtra)
+library(grid)
+library(ggpubr)
+library(kableExtra)
+library(data.table)
+library(foreign)
+library(readxl)
 
 
 #Main Files ####
-AP_Youth_Survey <- read_excel("youth_survey_responses (27th Jan).xlsx")
-AP_Household_Roster <- read_excel("Household Roster Youth Survey (27th Jan).xlsx")
-AP_Outmigration_Roster <- read_excel("Outmigration Roster Youth Survey (27th Jan).xlsx")
+AP_Youth_Survey <- read_excel("/Users/gurkirat/Desktop/Archive-2/youth_survey_responses (27th Jan).xlsx")
+AP_Household_Roster <- read_excel("/Users/gurkirat/Desktop/Archive-2/Household Roster Youth Survey (27th Jan).xlsx")
+AP_Outmigration_Roster <- read_excel("/Users/gurkirat/Desktop/Archive-2/Outmigration Roster Youth Survey (27th Jan).xlsx")
 
 
 #Codebooks ####
@@ -188,6 +213,32 @@ rm(M, Mal, Fal)
 #### A
 Gurkirat
 1. Religion, Gender and Caste breakdown
+
+```{r}
+##Composition of households
+ch <- as.data.frame (table(AP_Household_Roster$H_1)) %>% 
+rename("Relationship with the respondent" = Var1) %>% 
+rename ("Count" = Freq) %>% 
+arrange (desc(Count))
+
+
+ch %>% 
+kbl(caption = "Composition of households")%>%
+  kable_classic(full_width = F, html_font = "Cambria", font_size = 15)
+
+##Gender Disaggregation of youth respondent and other members of the household (Household Roster)
+g1 <- as.data.frame(table(AP_Household_Roster$Gender[AP_Household_Roster$H_1 == "Self"]))
+
+#Male respondents: 960; Women Respondents: 999
+#Note: 21 self-respondents wrongly marked 
+
+
+g2 <- as.data.frame(table(AP_Household_Roster$Gender[AP_Household_Roster$H_1 == "Brother" | AP_Household_Roster$H_1 == "Child" | AP_Household_Roster$H_1 == "Father" | AP_Household_Roster$H_1 == "Father-in-law"  | AP_Household_Roster$H_1 == "Grandfather" | AP_Household_Roster$H_1 == "Grandmother" | AP_Household_Roster$H_1 == "Husband" | AP_Household_Roster$H_1 == "Mother" |AP_Household_Roster$H_1 == "Mother-in-law"|AP_Household_Roster$H_1 == "Non-Relatives (guests, servants, help, etc.)" | AP_Household_Roster$H_1 == "Other Relatives"| AP_Household_Roster$H_1 == "Other-in-laws"| AP_Household_Roster$H_1 == "Sister"| AP_Household_Roster$H_1 == "Uncle/Aunt"| AP_Household_Roster$H_1 == "Wife"]))
+
+
+
+```
+
 
 
 #### E
