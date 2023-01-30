@@ -1,6 +1,6 @@
 ---
 title: "AP Youth Survey"
-author: "Vaibhav Parik"
+author: "Centre for Policy Research"
 date: "2023-01-19"
 output:
   pdf_document:
@@ -51,9 +51,9 @@ newtheme <- theme_bw() +
         panel.grid.major = element_blank(), legend.position = "bottom")
 
 #Main Files ####
-AP_Youth_Survey <- read_excel("youth_survey_responses (27th Jan).xlsx")
-AP_Household_Roster <- read_excel("Household Roster Youth Survey (27th Jan).xlsx")
-AP_Outmigration_Roster <- read_excel("Outmigration Roster Youth Survey (27th Jan).xlsx")
+AP_Youth_Survey <- read_excel("/Users/gurkirat/Desktop/Archive-2/youth_survey_responses (27th Jan).xlsx")
+AP_Household_Roster <- read_excel("/Users/gurkirat/Desktop/Archive-2/Household Roster Youth Survey (27th Jan).xlsx")
+AP_Outmigration_Roster <- read_excel("/Users/gurkirat/Desktop/Archive-2/Outmigration Roster Youth Survey (27th Jan).xlsx")
 
 
 #Codebooks ####
@@ -93,7 +93,7 @@ wrap.labels <- function(x, len)
 
 
 ```
-
+\newpage
 
 # List of flags encountered so far
 
@@ -201,6 +201,7 @@ knitr::include_graphics("Images/Female Youth Educ.png")
 rm(x1,x2)
 
 ```
+\newpage
 
 Tables for occupation of parent and education of respondent
 
@@ -222,10 +223,7 @@ knitr::include_graphics("Images/Female Youth Occup 1.png")
 rm(M, Mal, Fal, a1, a2)
 
 ```
-
-
-To be done later - AP youth is not growing up in a cushy environment - Asset ownership
-
+\newpage
 
 ## Demographic Analysis (Section A)
 
@@ -259,6 +257,7 @@ rename ("Count" = Freq)
 #Male Members:
 ```
 
+
 Government Caste Categories (by household)
 
 
@@ -275,12 +274,15 @@ caste_plot <- ggplot(caste, aes(x= `Household Caste Category`, y= Proportions, f
   geom_text (aes(label = Proportions), position = position_dodge(0.1), vjust = -1) + scale_y_continuous(limits = c(0,70)) +
   scale_x_discrete(labels = function(`Household Caste Category`) str_wrap(`Household Caste Category`, width = 10)) +
   scale_fill_brewer(palette="YlGnBu") +
-  labs(x="",y="Percentage", subtitle = "Government Caste Category of households") + newtheme
+  labs(x="",y="Percentage") + newtheme
 
 caste_plot
 ```
 
-```{r, echo=F, warning=F, fig.height=6, fig.width=10}
+Household Religion
+
+
+```{r, echo=F, warning=F, fig.width=10, fig.height=6}
 ##Religion of Households
 religion <- as.data.frame(table(AP_Youth_Survey$Y_A_13)) %>% 
 mutate (Proportions = round(Freq*100/sum(Freq),1)) %>% 
@@ -293,11 +295,11 @@ religion_plot <- ggplot(religion, aes(x= `Religion of Household`, y= Proportions
   scale_y_continuous(limits = c(0,80)) +
   scale_x_discrete(labels = function(`Religion of Household`) str_wrap(`Religion of Household`, width = 10)) +
   scale_fill_brewer(palette="YlGnBu") +
-  labs(x="",y="Percentage", subtitle = "Religion of Household") + newtheme
+  labs(x="",y="Percentage") + newtheme
 
 religion_plot
 ```
-
+\newpage
 
 ## Youth Questions (Section G) 
 Q. Do you think your economic fortunes will be better or worse than your parents? (Y_G_186)
@@ -314,16 +316,17 @@ Y_G_186_plot <- ggplot(Y_G_186, aes(x= Response, y= Proportions, fill = Response
   scale_y_continuous(limits = c(0,80)) +
   scale_x_discrete(labels = function(`Response`) str_wrap(`Response`, width = 10)) +
   scale_fill_brewer(palette="YlGnBu") +
-  labs(x="",y="Percentage", subtitle = "Do you think your economic fortunes will be better or worse than your parents?") + newtheme
+  labs(x="",y="Percentage") + newtheme
 
 Y_G_186_plot
 
 ```
+\newpage
 
 Q. In the past 5 years, compared to other states in India, do you believe citizens of Andhra Pradesh have done better or worse? (Y_G_187)
 
 
-```{r, echo = FALSE, fig.height=6, fig.width=10, warning=FALSE}
+```{r, echo = FALSE, fig.height=5, fig.width=10, warning=FALSE}
 ##Y_G_187
 Y_G_187 <- as.data.frame(table(AP_Youth_Survey$Y_G_187)) %>% 
 mutate (Proportions = round(Freq*100/sum(Freq),1)) %>% 
@@ -336,14 +339,14 @@ Y_G_187_plot <- ggplot(Y_G_187, aes(x= Response, y= Proportions, fill = Response
   scale_y_continuous(limits = c(0,80)) +
   scale_x_discrete(labels = function(`Response`) str_wrap(`Response`, width = 10)) +
   scale_fill_brewer(palette="YlGnBu") +
-  labs(x="",y="Percentage", subtitle = "In the past 5 years, compared to other states in India, do you believe citizens of Andhra Pradesh have done better or worse?") + newtheme
+  labs(x="",y="Percentage") + newtheme
 
 Y_G_187_plot
 ```
 
 Q. Andhra Pradesh now has many cash schemes to give money to its citizens, like Ammavodi and YSR Cheyutha. Do you believe the amount given in cash schemes should be more or less? (Y_G_188)
 
-```{r, echo=F, warning=F, fig.height=6, fig.width=10}
+```{r, echo=F, warning=F, fig.height=5, fig.width=10}
 Y_G_188 <- as.data.frame(table(AP_Youth_Survey$Y_G_188)) %>% 
 mutate (Proportions = round(Freq*100/sum(Freq),1)) %>% 
 rename ("Response" = Var1) %>% 
@@ -355,11 +358,12 @@ Y_G_188_plot <- ggplot(Y_G_188, aes(x= Response, y= Proportions, fill = Response
   scale_y_continuous(limits = c(0,80)) +
   scale_x_discrete(labels = function(`Response`) str_wrap(`Response`, width = 10)) +
   scale_fill_brewer(palette="YlGnBu") +
-  labs(x="",y="Percentage", subtitle = "Do you believe the amount given in cash schemes should be more or less?") + newtheme
+  labs(x="",y="Percentage") + newtheme
 
 Y_G_188_plot
 
 ```
+\newpage
 
 Q. Do you believe democracy in India is getting stronger or weaker? (Y_G_189)
 
@@ -375,10 +379,11 @@ Y_G_189_plot <- ggplot(Y_G_189, aes(x= Response, y= Proportions, fill = Response
   scale_y_continuous(limits = c(0,80)) +
   scale_x_discrete(labels = function(`Response`) str_wrap(`Response`, width = 10)) +
   scale_fill_brewer(palette="YlGnBu") +
-  labs(x="",y="Percentage", subtitle = "Do you believe democracy in India is getting stronger or weaker?") + newtheme
+  labs(x="",y="Percentage") + newtheme
 
 Y_G_189_plot
 ```
+\newpage
 
 ## Social Security and Scheme based receipts (Section E)
 Scheme based benefit receipts & Credit attribution (Clean Y_E_75 and associated q):
@@ -413,9 +418,11 @@ bp <- barplot(c$Benefit_Rate, names.arg = names, ylim = c(0,55), border = NA, co
 text(bp, c$Benefit_Rate, round(c$Benefit_Rate, 1), pos = 3)
 ```
 
+
 Now for who they attribute the credit to - Very little to centre in most cases, overwhelmingly state.
 This is also because in the yes responses when we look at which scheme, it is mostly the state scheme they claim to receive benefits under
 
+\vspace{6mm}
 ```{r, echo = F, warning=F, out.width=500}
 #Attribution
 vec <- c(62, 67, 72, 77, 82) + 3
@@ -440,8 +447,7 @@ kbl(caption = "Attribution for Social Schemes", align = "l", col.names = c("Sche
   kable_classic(full_width = F, html_font = "Cambria", font_size = 11)
 
 ```
-
-
+\newpage
 
 ## Primary Activity Details, Employment and Skilling (Section F)
 
@@ -461,7 +467,7 @@ text(bp, 100*prop.table(t$Freq), round(100*prop.table(t$Freq)), pos = 3)
 
 For 30+
 
-```{r, echo=F, fig.width=10, fig.height=6, warning=F}
+```{r, echo=F, fig.width=10, fig.height=5, warning=F}
 OO_LF <- c("Attending Domestic Duties", "Student", "Others", "Retired", NA)
 
 t <- as.data.frame(table(AP_Household_Roster$H_6[AP_Household_Roster$Age > 30 & (AP_Household_Roster$H_6 %in% OO_LF) == F]))
@@ -470,6 +476,7 @@ bp <- barplot(100*prop.table(t$Freq), names.arg = wrap.labels(t$Var1, 20), ylim 
 text(bp, 100*prop.table(t$Freq), round(100*prop.table(t$Freq)), pos = 3)
 
 ```
+\newpage
 
 Breakdown of youth into separate groups
 
@@ -490,6 +497,7 @@ bp <- barplot(100*prop.table(t$Freq), names.arg = wrap.labels(t$Var1, 20), ylim 
 text(bp, 100*prop.table(t$Freq), round(100*prop.table(t$Freq)), pos = 3)
 
 ```
+\newpage
 
 Breakdown of employment structure by gender. 
 Male - Blue, Female - Red
@@ -530,7 +538,7 @@ AP_Youth_Survey$YR_F_94 <- ifelse(AP_Youth_Survey$Y_F_81 == "Student", AP_Youth_
 Taking Skilling Courses - 
 Q. Would skill training in any of the following areas be beneficial for your professional goals?
 
-```{r, echo=F, message=FALSE, warning=F, fig.width = 10, fig.height=6}
+```{r, echo=F, message=FALSE, warning=F, fig.width = 10, fig.height=5}
 attach(AP_Youth_Survey)
 a1 <- as.data.frame(table(YR_F_87 == "No")); a1$Freq <- round(100*a1$Freq/sum(a1$Freq), 2)
 
@@ -548,12 +556,12 @@ text(bp, v, round(v, 1), pos = 3)
 rm(a1,a2,a3,a4,v)
 
 ```
-
+\newpage
 
 Interest in taking Skilling Courses -
 Q. Would skill training in any of the following areas be beneficial for your professional goals?
 
-```{r, echo=F, message=FALSE, warning=F, fig.width = 10, fig.height=6}
+```{r, echo=F, message=FALSE, warning=F, fig.width = 10, fig.height=5}
 a1 <- as.data.frame(table(YR_F_92 == "No")); a1$Freq <- round(100*a1$Freq/sum(a1$Freq), 2)
 
 a2 <- as.data.frame(table(YR_F_92[Y_F_81 == "Student"] == "No")); a2$Freq <- round(100*a2$Freq/sum(a2$Freq), 2)
@@ -574,7 +582,7 @@ rm(a1,a2,a3,a4,v)
 Intention of Interested Respondents to Take Courses
 Q. Do you intend to take up formal or informal courses for this skills training in the near future?
 
-```{r, echo=F, message=FALSE, warning=F, fig.width = 10, fig.height=6}
+```{r, echo=F, message=FALSE, warning=F, fig.width = 10, fig.height=5}
 a1 <- as.data.frame(table(YR_F_94 == "No")); a1$Freq <- round(100*a1$Freq/sum(a1$Freq), 2)
 
 a2 <- as.data.frame(table(YR_F_94[Y_F_81 == "Student"] == "No")); a2$Freq <- round(100*a2$Freq/sum(a2$Freq), 2)
@@ -592,7 +600,7 @@ rm(a1,a2,a3,a4,v)
 
 detach(AP_Youth_Survey)
 ```
-
+\newpage
 
 # Potential Next Steps
 
