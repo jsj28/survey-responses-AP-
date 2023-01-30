@@ -6,12 +6,15 @@ output:
   pdf_document:
     toc: yes
     number_sections: yes
+    fig_width: 10
+    fig_height: 6
+    extra_dependencies: ["flafter"]
 fontsize: 11pt
 geometry: margin=1in
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = F)
 library(data.table)
 library(readxl)
 library(writexl)
@@ -40,16 +43,17 @@ library(kableExtra)
 library(data.table)
 library(foreign)
 library(readxl)
-
+library(knitr)
+library(tinytex)
 ##Plot theme
 newtheme <- theme_bw() +
   theme(panel.border = element_rect(color = "darkgrey", size = 2), 
         panel.grid.major = element_blank(), legend.position = "bottom")
 
 #Main Files ####
-AP_Youth_Survey <- read_excel("/Users/gurkirat/Desktop/Archive-2/youth_survey_responses (27th Jan).xlsx")
-AP_Household_Roster <- read_excel("/Users/gurkirat/Desktop/Archive-2/Household Roster Youth Survey (27th Jan).xlsx")
-AP_Outmigration_Roster <- read_excel("/Users/gurkirat/Desktop/Archive-2/Outmigration Roster Youth Survey (27th Jan).xlsx")
+AP_Youth_Survey <- read_excel("youth_survey_responses (27th Jan).xlsx")
+AP_Household_Roster <- read_excel("Household Roster Youth Survey (27th Jan).xlsx")
+AP_Outmigration_Roster <- read_excel("Outmigration Roster Youth Survey (27th Jan).xlsx")
 
 
 #Codebooks ####
@@ -91,19 +95,19 @@ wrap.labels <- function(x, len)
 ```
 
 
-### List of flags encountered so far
+# List of flags encountered so far
 
-#### 1. Absence of Self Respondents
+## Absence of Self Respondents
 
 We found that there are certain surveys which do not have any member of the household identified as the true respondent. According to the data by Jan 23, there are 21 such households. In total, there are about 64 respondents, once we remove children below 19, among which there are 21 true respondents who need to be identified through the face pages. Details on the same from the roster can be found below, and these have been merged with the main survey too. 
 
 Face page references are also needed for 1 and 2(b) in the next section##
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, warning = F}
 #Non Self data file
 v <- AP_Youth_Survey$`_uuid`[(AP_Youth_Survey$`_uuid` %in% AP_Household_Roster$`_submission__uuid`[AP_Household_Roster$H_1 == "Self"]) == F]
 
-AP_Household_Roster$H_1[AP_Household_Roster$`_submission__uuid` %in% v]
+#AP_Household_Roster$H_1[AP_Household_Roster$`_submission__uuid` %in% v]
 
 AP_Household_NonSelf <- AP_Household_Roster[AP_Household_Roster$`_submission__uuid` %in% v,]
 AP_Household_NonSelf <- AP_Household_NonSelf[AP_Household_NonSelf$Age > 18,]
@@ -115,64 +119,65 @@ for(i in 1:nrow(AP_Household_NonSelf)) {
   
 }
 
-head(AP_Household_NonSelf[,c(1:8)])
+head(AP_Household_NonSelf[,c(2:9)]) 
 
 
 ```
 
-#### 2. Enumerator IDs entered as Respondent IDs
+## Enumerator IDs entered as Respondent IDs
 
 There are certain cases were it seems enumerator IDs have mistakenly been entered as respondent IDs. Given the last digit of the respondent ID is restricted to being less than 5, and the overall number should not exceed beyond 2100, we flagged certain IDs which were irregular. Upon crosschecking it seemed they were indeed enumerator IDs, and we are sharing a table of such IDs and the number of such responses below. 
 
-```{r, echo = FALSE}
+```{r, echo=F, warning=F}
 
 table(AP_Youth_Survey$`Enumerator Code`[AP_Youth_Survey$`Enumerator Code` == AP_Youth_Survey$`Respondent ID`])
 
 ```
 
 
-#### 3. Misclassification of Adults as Children
+## Misclassification of Adults as Children
 
 There are about 16 cases where adults above the age of 19 have been entered as children. These are shown below. While they may all not necessarily be the respondent, these people need to be reclassified based on face pages.
 
-```{r, echo = F}
+```{r, echo=F, warning=F}
 
 Child_MisClass <- AP_Household_Roster[AP_Household_Roster$Age > 19 & AP_Household_Roster$H_1 == "Child",]
 
 Child_MisClass[,c(1:8)]
 ```
 
-#### 4. Marital Status of Children - Gurkirat
+## Marital Status of Children
 
 Marital status and children crosscheck - are there a lot of children?
 
 
-#### 5. Disparities between Sector and Roster Occupation - Gurkirat
+## Disparities between Sector and Roster Occupation
 
-Any disparities between respondent occupation and industry mentioned in the roster/survey responses
+Any disparities between respondent occupation and industry mentioned in the roster/survey responses?
 
 
 Overall- Look at errors by enumerator IDs
 
-### Analysis Observations from the Sample
+# Observations from the Sample
 
-#### 1. Capturing Seasonal and Long Term Employment
+## Capturing Seasonal and Long Term Employment
 
 Roster captures - seasonal. 
 Main Survey captures long term
 There are certain cases where unemployed people have been counted as employed. We see that there's a large chunk of population that has been classified as employed based on the roster, but is unemployed in the main survey. Most of these responses seem to be from those engaged in casual/daily labour or self-employed, with unpaid family worker next in line
 
 
-#### 2. Inertia on willingness for skill development
+## Inertia on willingness for skill development
 The skilling questions - we do see little movement from those who have not taken skilling courses/workshops in their willingness to take them in the future. 
 
 
   
+# Analysis of Survey Responses
 
-### Analysis to be replicated from Partha’s slides 
-1. Education of Children to Parent’s education - Breakdown by male and female (Comparison with PLFS) - Vaibhav
+## Upward Mobility
+Education of Children to Parent’s education - Breakdown by male and female (Comparison with PLFS)
 
-```{r, echo = F}
+```{r, echo = F, warning = F, out.width=500}
 M <- as.data.table(AP_Household_Roster)
 M$UID = M$`_submission__uuid`
 M$Ma <- M$Gender == "Male" & M$H_1 == "Self"
@@ -187,38 +192,44 @@ Male <- M[UID %in% Mal,.(Father_Ed = H_5[H_1 == "Father"], Self_Ed = H_5[H_1 == 
 Female <- M[UID %in% Fal,.(Father_Ed = H_5[H_1 == "Father"], Self_Ed = H_5[H_1 == "Self"]), by=c("UID")]
 
 
-round(100*prop.table(table(Male$Father_Ed, Male$Self_Ed), 1), 1)
-round(100*prop.table(table(Female$Father_Ed, Female$Self_Ed), 1), 1)
+x1 <- round(100*prop.table(table(Male$Father_Ed, Male$Self_Ed), 1), 1)
+x2 <- round(100*prop.table(table(Female$Father_Ed, Female$Self_Ed), 1), 1)
+
+knitr::include_graphics("Images/Male Youth Educ.png")
+knitr::include_graphics("Images/Female Youth Educ.png")
+
+rm(x1,x2)
 
 ```
 
-Tables for occupation
+Tables for occupation of parent and education of respondent
 
-```{r, echo = F}
+```{r, echo = F, warning = F, out.width=500}
 M <- as.data.table(AP_Household_Roster)
 M$UID = M$`_submission__uuid`
 Male <- M[UID %in% Mal,.(Father_PA = H_6[H_1 == "Father"], Self_Ed = H_5[H_1 == "Self"]), by=c("UID")]
 
 Female <- M[UID %in% Fal,.(Father_PA = H_6[H_1 == "Father"], Self_Ed = H_5[H_1 == "Self"]), by=c("UID")]
 
-round(100*prop.table(table(Male$Father_PA, Male$Self_Ed), 1), 1)
-round(100*prop.table(table(Female$Father_PA, Female$Self_Ed), 1), 1)
+a1 <- round(100*prop.table(table(Male$Father_PA, Male$Self_Ed), 1), 1)
+a2 <- round(100*prop.table(table(Female$Father_PA, Female$Self_Ed), 1), 1)
 
-rm(M, Mal, Fal)
+knitr::include_graphics("Images/Male Youth Occup 1.png")
 
+
+knitr::include_graphics("Images/Female Youth Occup 1.png")
+
+rm(M, Mal, Fal, a1, a2)
 
 ```
 
 
-2. AP youth is not growing up in a cushy environment - Asset ownership - Gurkirat
+To be done later - AP youth is not growing up in a cushy environment - Asset ownership
 
 
-### Sectionwise Analysis to be added
-#### A
-Gurkirat
-1. Religion, Gender and Caste breakdown
+## Demographic Analysis (Section A)
 
-```{r}
+```{r, echo=F, warning=F, out.width= 500}
 ##Household Composition
 ch <- as.data.frame (table(AP_Household_Roster$H_1)) %>% 
 rename("Relationship with the respondent" = Var1) %>% 
@@ -227,8 +238,8 @@ arrange (desc(Count))
 
 
 ch %>% 
-kbl(caption = "Composition of households")%>%
-  kable_classic(full_width = F, html_font = "Cambria", font_size = 15)
+kbl(caption = "Composition of households", align = "l")%>%
+  kable_classic(full_width = F, html_font = "Cambria", font_size = 11)
 
 ##Youth respondent disaggregated by Gender
 g1 <- as.data.frame(table(AP_Household_Roster$Gender[AP_Household_Roster$H_1 == "Self"])) %>% 
@@ -249,7 +260,9 @@ rename ("Count" = Freq)
 ```
 
 Government Caste Categories (by household)
-```{r}
+
+
+```{r, echo=F, warning=F, fig.width=10, fig.height=6}
 ##Government Caste Categories (by household)
 caste <- as.data.frame(table(AP_Youth_Survey$Y_A_15)) %>% 
 mutate (Proportions = round(Freq*100/sum(Freq),1)) %>% 
@@ -267,7 +280,7 @@ caste_plot <- ggplot(caste, aes(x= `Household Caste Category`, y= Proportions, f
 caste_plot
 ```
 
-```{r}
+```{r, echo=F, warning=F, fig.height=6, fig.width=10}
 ##Religion of Households
 religion <- as.data.frame(table(AP_Youth_Survey$Y_A_13)) %>% 
 mutate (Proportions = round(Freq*100/sum(Freq),1)) %>% 
@@ -286,9 +299,9 @@ religion_plot
 ```
 
 
-Youth Questions: 
+## Youth Questions (Section G) 
 Q. Do you think your economic fortunes will be better or worse than your parents? (Y_G_186)
-```{r}
+```{r, echo=F, warning=F, fig.height=6, fig.width=10}
 ##Y_G_186
 Y_G_186 <- as.data.frame(table(AP_Youth_Survey$Y_G_186)) %>% 
 mutate (Proportions = round(Freq*100/sum(Freq),1)) %>% 
@@ -306,8 +319,11 @@ Y_G_186_plot <- ggplot(Y_G_186, aes(x= Response, y= Proportions, fill = Response
 Y_G_186_plot
 
 ```
+
 Q. In the past 5 years, compared to other states in India, do you believe citizens of Andhra Pradesh have done better or worse? (Y_G_187)
-```{r, echo = FALSE, fig.height=5,fig.width=9, warning=FALSE}
+
+
+```{r, echo = FALSE, fig.height=6, fig.width=10, warning=FALSE}
 ##Y_G_187
 Y_G_187 <- as.data.frame(table(AP_Youth_Survey$Y_G_187)) %>% 
 mutate (Proportions = round(Freq*100/sum(Freq),1)) %>% 
@@ -324,8 +340,10 @@ Y_G_187_plot <- ggplot(Y_G_187, aes(x= Response, y= Proportions, fill = Response
 
 Y_G_187_plot
 ```
+
 Q. Andhra Pradesh now has many cash schemes to give money to its citizens, like Ammavodi and YSR Cheyutha. Do you believe the amount given in cash schemes should be more or less? (Y_G_188)
-```{r}
+
+```{r, echo=F, warning=F, fig.height=6, fig.width=10}
 Y_G_188 <- as.data.frame(table(AP_Youth_Survey$Y_G_188)) %>% 
 mutate (Proportions = round(Freq*100/sum(Freq),1)) %>% 
 rename ("Response" = Var1) %>% 
@@ -342,8 +360,10 @@ Y_G_188_plot <- ggplot(Y_G_188, aes(x= Response, y= Proportions, fill = Response
 Y_G_188_plot
 
 ```
+
 Q. Do you believe democracy in India is getting stronger or weaker? (Y_G_189)
-```{r}
+
+```{r, echo=F, warning=F, fig.height=6, fig.width=10}
 Y_G_189 <- as.data.frame(table(AP_Youth_Survey$Y_G_189)) %>% 
 mutate (Proportions = round(Freq*100/sum(Freq),1)) %>% 
 rename ("Response" = Var1) %>% 
@@ -360,13 +380,12 @@ Y_G_189_plot <- ggplot(Y_G_189, aes(x= Response, y= Proportions, fill = Response
 Y_G_189_plot
 ```
 
-#### E
-Vaibhav
-1. Scheme based benefit receipts & Credit attribution (Clean Y_E_75 and associated q)
+## Social Security and Scheme based receipts (Section E)
+Scheme based benefit receipts & Credit attribution (Clean Y_E_75 and associated q):
 
-First a table for receipts, how many respondents have claimed to receive at least some benefit or the other
+First, how many respondents have claimed to receive at least some benefit or the other
 
-```{r, echo = F}
+```{r, echo = F, fig.width=10, fig.height=6, warning=F}
 
 Neg_Resp <- c("No", "Don't Know", "Don't know")
 
@@ -396,7 +415,8 @@ text(bp, c$Benefit_Rate, round(c$Benefit_Rate, 1), pos = 3)
 
 Now for who they attribute the credit to - Very little to centre in most cases, overwhelmingly state.
 This is also because in the yes responses when we look at which scheme, it is mostly the state scheme they claim to receive benefits under
-```{r, echo = F}
+
+```{r, echo = F, warning=F, out.width=500}
 #Attribution
 vec <- c(62, 67, 72, 77, 82) + 3
 
@@ -414,46 +434,51 @@ for (i in 1:nrow(c)) {
 d <- cbind.data.frame(names, State_Att = State_Att/c$Yes_Resp, Cent_Att = Cent_Att/c$Yes_Resp, Both_Att = Both_Att/c$Yes_Resp)
 
 d[,c(2:4)] <- 100*round(d[,c(2:4)], 4)
-d
+
+d %>% 
+kbl(caption = "Attribution for Social Schemes", align = "l", col.names = c("Scheme", "State Government", "Central Government", "Both State and Centre"))%>%
+  kable_classic(full_width = F, html_font = "Cambria", font_size = 11)
 
 ```
 
 
 
-#### F
-Vaibhav
+## Primary Activity Details, Employment and Skilling (Section F)
+
 1. Primary Activity - Employment Distribution (Primary Activity) - 19-29 and 30+ (across gender)
 
-For 29-30
-```{r, echo=F}
+For 19-29
+
+```{r, echo=F, warning=F, fig.width=10, fig.height=6}
 OO_LF <- c("Attending Domestic Duties", "Student", "Others", "Retired", NA)
 
 t <- as.data.frame(table(AP_Household_Roster$H_6[AP_Household_Roster$Age %in% 19:29 & (AP_Household_Roster$H_6 %in% OO_LF) == F]))
 
-bp <- barplot(100*prop.table(t$Freq), names.arg = wrap.labels(t$Var1, 20), ylim = c(0,50), border = NA, col = "coral2", main = "Structure of Employment Among Youth", xlab = "Primary Activity", ylab = "Percentage of Labour Force")
+bp <- barplot(100*prop.table(t$Freq), names.arg = wrap.labels(t$Var1, 20), ylim = c(0,50), border = NA, col = "coral2", main = "Structure of Employment Among Youth", xlab = "Primary Activity", ylab = "Percentage of Labour Force", cex.names = 0.75)
 text(bp, 100*prop.table(t$Freq), round(100*prop.table(t$Freq)), pos = 3)
 
 ```
 
 For 30+
 
-```{r, echo=F}
+```{r, echo=F, fig.width=10, fig.height=6, warning=F}
 OO_LF <- c("Attending Domestic Duties", "Student", "Others", "Retired", NA)
 
 t <- as.data.frame(table(AP_Household_Roster$H_6[AP_Household_Roster$Age > 30 & (AP_Household_Roster$H_6 %in% OO_LF) == F]))
 
-bp <- barplot(100*prop.table(t$Freq), names.arg = wrap.labels(t$Var1, 20), ylim = c(0,50), border = NA, col = "coral2", main = "Structure of Employment Among Adults (30+)", xlab = "Primary Activity", ylab = "Percentage of Labour Force")
+bp <- barplot(100*prop.table(t$Freq), names.arg = wrap.labels(t$Var1, 20), ylim = c(0,50), border = NA, col = "coral2", main = "Structure of Employment Among Adults (30+)", xlab = "Primary Activity", ylab = "Percentage of Labour Force", cex.names = 0.75)
 text(bp, 100*prop.table(t$Freq), round(100*prop.table(t$Freq)), pos = 3)
 
 ```
-Breakdown of youth
 
-```{r, echo=F}
+Breakdown of youth into separate groups
+
+```{r, echo=F, warning=F, fig.width=10, fig.height=6}
 OO_LF <- c("Attending Domestic Duties", "Student", "Others", "Retired", NA)
 
 t <- as.data.frame(table(AP_Household_Roster$H_6[AP_Household_Roster$Age %in% 19:24 & (AP_Household_Roster$H_6 %in% OO_LF) == F]))
 
-bp <- barplot(100*prop.table(t$Freq), names.arg = wrap.labels(t$Var1, 20), ylim = c(0,50), border = NA, col = "coral2", main = "Structure of Employment Among Youth", xlab = "Primary Activity", ylab = "Percentage of Labour Force")
+bp <- barplot(100*prop.table(t$Freq), names.arg = wrap.labels(t$Var1, 20), ylim = c(0,50), border = NA, col = "coral2", main = "Structure of Employment Among Youth (19-24)", xlab = "Primary Activity", ylab = "Percentage of Labour Force", cex.names = 0.75)
 text(bp, 100*prop.table(t$Freq), round(100*prop.table(t$Freq)), pos = 3)
 
 
@@ -461,14 +486,15 @@ OO_LF <- c("Attending Domestic Duties", "Student", "Others", "Retired", NA)
 
 t <- as.data.frame(table(AP_Household_Roster$H_6[AP_Household_Roster$Age %in% 25:29 & (AP_Household_Roster$H_6 %in% OO_LF) == F]))
 
-bp <- barplot(100*prop.table(t$Freq), names.arg = wrap.labels(t$Var1, 20), ylim = c(0,50), border = NA, col = "dodgerblue", main = "Structure of Employment Among Youth", xlab = "Primary Activity", ylab = "Percentage of Labour Force")
+bp <- barplot(100*prop.table(t$Freq), names.arg = wrap.labels(t$Var1, 20), ylim = c(0,50), border = NA, col = "dodgerblue", main = "Structure of Employment Among Youth (25-29)", xlab = "Primary Activity", ylab = "Percentage of Labour Force", cex.names = 0.75)
 text(bp, 100*prop.table(t$Freq), round(100*prop.table(t$Freq)), pos = 3)
 
 ```
 
-By Gender
+Breakdown of employment structure by gender. 
+Male - Blue, Female - Red
 
-```{r, echo=F}
+```{r, echo=F, warning=F, fig.width=10, fig.height=6}
 OO_LF <- c("Attending Domestic Duties", "Student", "Others", "Retired")
 
 t1 <- as.data.frame(table(AP_Household_Roster$H_6[AP_Household_Roster$Age %in% 19:29 & (AP_Household_Roster$H_6 %in% OO_LF) == F & AP_Household_Roster$Gender == "Male"]))
@@ -479,22 +505,96 @@ t2$Freq <- t2$Freq/sum(t2$Freq)
 
 t <- merge(t1, t2, by = c("Var1"))
 
-bp <- barplot(t(100*t[,c(2:3)]), beside = T, names.arg = wrap.labels(t$Var1, 20), ylim = c(0,50), border = "white", col = c("dodgerblue","coral2"), main = "Structure of Employment Among Youth (by Gender)", xlab = "Primary Activity", ylab = "Percentage of Labour Force")
+bp <- barplot(t(100*t[,c(2:3)]), beside = T, names.arg = wrap.labels(t$Var1, 20), ylim = c(0,50), border = "white", col = c("dodgerblue","coral2"), main = "Structure of Employment Among Youth (by Gender)", xlab = "Primary Activity", ylab = "Percentage of Labour Force", cex.names = 0.8)
 
 ```
 
 
-2. Skilling - Have you taken any course, Would any course be beneficial, If yes, do you intend to take it? - Collapse them into 3 columns from 9
+Skilling - We are mainly analysing three things. First, have you taken a course already (Enrolment). Second, do you think any of the skilling courses would be beneficial (Interested). Finally, would youenroll in one (Intent). 
+
+```{r, echo=FALSE, warning = F}
+#Combining Skill Question Columns 
+#In main survey
+AP_Youth_Survey$YR_F_87 <- ifelse(AP_Youth_Survey$Y_F_81 == "Student", AP_Youth_Survey$Y_F_87,
+                                  ifelse(AP_Youth_Survey$Y_F_81 == "Employed", AP_Youth_Survey$Y_F_123, AP_Youth_Survey$Y_F_160))
+
+AP_Youth_Survey$YR_F_92 <- ifelse(AP_Youth_Survey$Y_F_81 == "Student", AP_Youth_Survey$Y_F_92,
+                                  ifelse(AP_Youth_Survey$Y_F_81 == "Employed", AP_Youth_Survey$Y_F_128, AP_Youth_Survey$Y_F_165))
+
+AP_Youth_Survey$YR_F_94 <- ifelse(AP_Youth_Survey$Y_F_81 == "Student", AP_Youth_Survey$Y_F_94,
+                                  ifelse(AP_Youth_Survey$Y_F_81 == "Employed", AP_Youth_Survey$Y_F_130, AP_Youth_Survey$Y_F_167))
 
 
+```
 
-#### G 
-Gurkirat
-All four questions to be done
+Taking Skilling Courses - 
+Q. Would skill training in any of the following areas be beneficial for your professional goals?
+
+```{r, echo=F, message=FALSE, warning=F, fig.width = 10, fig.height=6}
+attach(AP_Youth_Survey)
+a1 <- as.data.frame(table(YR_F_87 == "No")); a1$Freq <- round(100*a1$Freq/sum(a1$Freq), 2)
+
+a2 <- as.data.frame(table(YR_F_87[Y_F_81 == "Student"] == "No")); a2$Freq <- round(100*a2$Freq/sum(a2$Freq), 2)
+
+a3 <- as.data.frame(table(YR_F_87[Y_F_81 == "Employed"] == "No")); a3$Freq <- round(100*a3$Freq/sum(a3$Freq), 2)
+
+a4 <- as.data.frame(table(YR_F_87[Y_F_81 == "Unemployed"] == "No")); a4$Freq <- round(100*a4$Freq/sum(a4$Freq), 2)  
+
+v <- c(a1$Freq[a1$Var1 == F], a2$Freq[a2$Var1 == F], a3$Freq[a3$Var1 == F], a4$Freq[a4$Var1 == F])
+  
+bp <- barplot(v, col = c("navyblue", "dodgerblue3", "dodgerblue", "skyblue2"), border = NA, las = 1, ylim = c(0,35), main = "Proportion of Respondents with Skilling Courses", names.arg = c('Overall', 'Student', 'Employed', 'Unemployed'), xlab = "Category", ylab = "Percentage within Category")
+text(bp, v, round(v, 1), pos = 3)
+
+rm(a1,a2,a3,a4,v)
+
+```
 
 
+Interest in taking Skilling Courses -
+Q. Would skill training in any of the following areas be beneficial for your professional goals?
 
-### Potential Next Steps
+```{r, echo=F, message=FALSE, warning=F, fig.width = 10, fig.height=6}
+a1 <- as.data.frame(table(YR_F_92 == "No")); a1$Freq <- round(100*a1$Freq/sum(a1$Freq), 2)
+
+a2 <- as.data.frame(table(YR_F_92[Y_F_81 == "Student"] == "No")); a2$Freq <- round(100*a2$Freq/sum(a2$Freq), 2)
+
+a3 <- as.data.frame(table(YR_F_92[Y_F_81 == "Employed"] == "No")); a3$Freq <- round(100*a3$Freq/sum(a3$Freq), 2)
+
+a4 <- as.data.frame(table(YR_F_92[Y_F_81 == "Unemployed"] == "No")); a4$Freq <- round(100*a4$Freq/sum(a4$Freq), 2)  
+
+v <- c(a1$Freq[a1$Var1 == F], a2$Freq[a2$Var1 == F], a3$Freq[a3$Var1 == F], a4$Freq[a4$Var1 == F])
+  
+bp <- barplot(v, col = c("navyblue", "dodgerblue3", "dodgerblue", "skyblue2"), border = NA, las = 1, ylim = c(0,50), main = "Proportion of Respondents Interested in taking Skilling Courses", names.arg = c('Overall', 'Student', 'Employed', 'Unemployed'), xlab = "Category", ylab = "Percentage within Category")
+text(bp, v, round(v, 1), pos = 3)
+
+
+rm(a1,a2,a3,a4,v)
+```
+
+Intention of Interested Respondents to Take Courses
+Q. Do you intend to take up formal or informal courses for this skills training in the near future?
+
+```{r, echo=F, message=FALSE, warning=F, fig.width = 10, fig.height=6}
+a1 <- as.data.frame(table(YR_F_94 == "No")); a1$Freq <- round(100*a1$Freq/sum(a1$Freq), 2)
+
+a2 <- as.data.frame(table(YR_F_94[Y_F_81 == "Student"] == "No")); a2$Freq <- round(100*a2$Freq/sum(a2$Freq), 2)
+
+a3 <- as.data.frame(table(YR_F_94[Y_F_81 == "Employed"] == "No")); a3$Freq <- round(100*a3$Freq/sum(a3$Freq), 2)
+
+a4 <- as.data.frame(table(YR_F_94[Y_F_81 == "Unemployed"] == "No")); a4$Freq <- round(100*a4$Freq/sum(a4$Freq), 2)  
+
+v <- c(a1$Freq[a1$Var1 == F], a2$Freq[a2$Var1 == F], a3$Freq[a3$Var1 == F], a4$Freq[a4$Var1 == F])
+  
+bp <- barplot(v, col = c("navyblue", "dodgerblue3", "dodgerblue", "skyblue2"), border = NA, las = 1, ylim = c(0,100), main = "Interested Respondents Intending to take Skilling Courses", names.arg = c('Overall', 'Student', 'Employed', 'Unemployed'), xlab = "Category", ylab = "Percentage within Category")
+text(bp, v, round(v, 1), pos = 3)
+
+rm(a1,a2,a3,a4,v)
+
+detach(AP_Youth_Survey)
+```
+
+
+# Potential Next Steps
 
 1. Running a sample crosscheck with GSWS data to see data quality and check consistency? - Neelan to take session
 2. Recode string variable values across the survey and roster
