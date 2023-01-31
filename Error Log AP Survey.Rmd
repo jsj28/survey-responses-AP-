@@ -45,15 +45,16 @@ library(foreign)
 library(readxl)
 library(knitr)
 library(tinytex)
+
 ##Plot theme
 newtheme <- theme_bw() +
   theme(panel.border = element_rect(color = "darkgrey", size = 2), 
         panel.grid.major = element_blank(), legend.position = "bottom")
 
 #Main Files ####
-AP_Youth_Survey <- read_excel("/Users/gurkirat/Desktop/Archive-2/youth_survey_responses (27th Jan).xlsx")
-AP_Household_Roster <- read_excel("/Users/gurkirat/Desktop/Archive-2/Household Roster Youth Survey (27th Jan).xlsx")
-AP_Outmigration_Roster <- read_excel("/Users/gurkirat/Desktop/Archive-2/Outmigration Roster Youth Survey (27th Jan).xlsx")
+AP_Youth_Survey <- read_excel("youth_survey_responses (27th Jan).xlsx")
+AP_Household_Roster <- read_excel("Household Roster Youth Survey (27th Jan).xlsx")
+AP_Outmigration_Roster <- read_excel("Outmigration Roster Youth Survey (27th Jan).xlsx")
 
 
 #Codebooks ####
@@ -171,11 +172,67 @@ There are certain cases where unemployed people have been counted as employed. W
 The skilling questions - we do see little movement from those who have not taken skilling courses/workshops in their willingness to take them in the future. 
 
 
-  
+\newpage
+
 # Analysis of Survey Responses
 
 ## Upward Mobility
-Education of Children to Parent’s education - Breakdown by male and female (Comparison with PLFS)
+
+Distribution of Education in the Roster - First by Respondents
+
+```{r, echo = F, warning=F, out.width=500}
+
+Below_10 <- c("Class 5 Pass", "Class 8 Pass", "Don't know", "Not Literate", "Literate but No Formal Educaiton")
+Above_12 <- c("Diploma/Certificate Course", "Graduate: General", "Graduate: Technical", "Postgraduate and above")
+
+AP_Household_Roster$Educ_Rec <- ifelse(AP_Household_Roster$H_5 %in% Below_10, "Below Class 10",
+                                       ifelse(AP_Household_Roster$H_5 %in% Above_12, "Above Class 12", AP_Household_Roster$H_5))
+
+
+m1 <- as.data.frame(round(100*prop.table(table(AP_Household_Roster$H_5[AP_Household_Roster$H_1 == "Father"])),1))
+m2 <- as.data.frame(round(100*prop.table(table(AP_Household_Roster$H_5[AP_Household_Roster$H_1 == "Mother"])),1)) 
+m3 <- as.data.frame(round(100*prop.table(table(AP_Household_Roster$H_5[AP_Household_Roster$H_1 == "Self"])),1))
+
+m <- merge(m1,m2, by=c("Var1"))
+m <- merge(m, m3, by=c("Var1"))
+
+order <- c(10,9,3,4,1,2,5,7,8,11)
+m <- m[order,]; rownames(m) <- NULL
+
+colnames(m) <- c("Highest Education Level", "Fathers", "Mothers", "Respondents")
+
+m %>% 
+kbl(caption = "Distribution of Highest Education Level: Household Roster", align = "l")%>%
+  kable_classic(full_width = F, html_font = "Cambria", font_size = 11)
+
+rm(m,m1,m2,m3)
+
+```
+Following are details of education levels distributed by age group - 
+
+```{r, echo=F, warning=F, fig.width=10, fig.height=6}
+Above_12 <- c(Above_12, "Class 12 Pass")
+
+v <- nl <- groups <- rep(NA, 5)
+le <- c(19,29,39,49,59)
+ue <- c(28,38,48,58,80)
+
+for (i in 1:5) {
+  
+  v[i] <- 100*sum(AP_Household_Roster$H_5[AP_Household_Roster$Age %in% le[i]:ue[i]] %in% Above_12)/sum(table(AP_Household_Roster$H_5[AP_Household_Roster$Age %in% le[i]:ue[i]]))
+  nl[i] <- 100*sum(AP_Household_Roster$H_5[AP_Household_Roster$Age %in% le[i]:ue[i]] == "Not Literate",na.rm = T)/sum(table(AP_Household_Roster$H_5[AP_Household_Roster$Age %in% le[i]:ue[i]]))
+  groups[i] <- paste(le[i],ue[i], sep="-")
+  
+}
+
+bp <- barplot(as.matrix(rbind(v,nl)), beside = T, names.arg = groups, col = c("dodgerblue3", "skyblue"), border = NA, main = "Distribution of Educational Qualification by Age Group", xlab = "Age Group",
+        ylab = "Percentage within Age Group", las = 1, ylim = c(0,75), legend.text = c("Class 12 and Above", "Not Literate"), args.legend = list(x = "top", bty = "n", border = "white", horiz = T))
+text(bp, as.matrix(rbind(v,nl)), round(as.matrix(rbind(v,nl))), pos = 3)
+
+```
+
+\newpage
+Education of Children to Parent’s education (Father's) - Breakdown by male and female (Comparison with PLFS)
 
 ```{r, echo = F, warning = F, out.width=500}
 M <- as.data.table(AP_Household_Roster)
@@ -202,6 +259,19 @@ rm(x1,x2)
 
 ```
 \newpage
+
+Distribution of Father's Occupation
+
+```{r}
+c <- as.data.frame(round(100*prop.table(table(AP_Household_Roster$H_6[AP_Household_Roster$H_1 == "Father"])),1))
+colnames(c) <- c("Father's Occupation", "Percentage")
+
+c %>% 
+  kbl(caption = "Distribution of Father's Occupation: Household Roster", align = "l")%>%
+  kable_classic(full_width = F, html_font = "Cambria", font_size = 11)
+  
+```
+
 
 Tables for occupation of parent and education of respondent
 
@@ -572,7 +642,7 @@ a4 <- as.data.frame(table(YR_F_92[Y_F_81 == "Unemployed"] == "No")); a4$Freq <- 
 
 v <- c(a1$Freq[a1$Var1 == F], a2$Freq[a2$Var1 == F], a3$Freq[a3$Var1 == F], a4$Freq[a4$Var1 == F])
   
-bp <- barplot(v, col = c("navyblue", "dodgerblue3", "dodgerblue", "skyblue2"), border = NA, las = 1, ylim = c(0,50), main = "Proportion of Respondents Interested in taking Skilling Courses", names.arg = c('Overall', 'Student', 'Employed', 'Unemployed'), xlab = "Category", ylab = "Percentage within Category")
+bp <- barplot(v, col = c("navyblue", "dodgerblue3", "dodgerblue", "skyblue2"), border = NA, las = 1, ylim = c(0,55), main = "Proportion of Respondents Interested in taking Skilling Courses", names.arg = c('Overall', 'Student', 'Employed', 'Unemployed'), xlab = "Category", ylab = "Percentage within Category")
 text(bp, v, round(v, 1), pos = 3)
 
 
