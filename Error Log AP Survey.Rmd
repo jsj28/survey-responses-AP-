@@ -52,9 +52,9 @@ newtheme <- theme_bw() +
         panel.grid.major = element_blank(), legend.position = "bottom")
 
 #Main Files ####
-AP_Youth_Survey <- read_excel("youth_survey_responses (27th Jan).xlsx")
-AP_Household_Roster <- read_excel("Household Roster Youth Survey (27th Jan).xlsx")
-AP_Outmigration_Roster <- read_excel("Outmigration Roster Youth Survey (27th Jan).xlsx")
+AP_Youth_Survey <- read_excel("/Users/gurkirat/Desktop/Archive-2/youth_survey_responses (27th Jan).xlsx")
+AP_Household_Roster <- read_excel("/Users/gurkirat/Desktop/Archive-2/Household Roster Youth Survey (27th Jan).xlsx")
+AP_Outmigration_Roster <- read_excel("/Users/gurkirat/Desktop/Archive-2/Outmigration Roster Youth Survey (27th Jan).xlsx")
 
 
 #Codebooks ####
@@ -380,7 +380,11 @@ mutate (Proportions = round(Freq*100/sum(Freq),1)) %>%
 rename ("Response" = Var1) %>% 
 rename ("Count" = Freq) 
 
-Y_G_186_plot <- ggplot(Y_G_186, aes(x= Response, y= Proportions, fill = Response)) +
+Y_G_186$Response <- as.factor(Y_G_186$Response)
+
+Y_G_186$Response <- factor(Y_G_186$Response, levels = c("Much Worse", "Somewhat Worse", "No Response", "Somewhat Better", "Much Better"))
+
+Y_G_186_plot <- ggplot(Y_G_186[ order(as.numeric(row.names(Y_G_186))), ], aes(x= Response, y= Proportions, fill = Response)) +
   geom_bar(stat="identity", width= 0.5, show.legend = FALSE) + 
   geom_text (aes(label = Proportions), position = position_dodge(0.1), vjust = -1) +
   scale_y_continuous(limits = c(0,80)) +
@@ -403,6 +407,10 @@ mutate (Proportions = round(Freq*100/sum(Freq),1)) %>%
 rename ("Response" = Var1) %>% 
 rename ("Count" = Freq) 
 
+Y_G_187$Response <- as.factor(Y_G_187$Response)
+
+Y_G_187$Response <- factor(Y_G_187$Response, levels = c("Much Worse", "Somewhat Worse", "No Response", "Somewhat Better", "Much Better"))
+
 Y_G_187_plot <- ggplot(Y_G_187, aes(x= Response, y= Proportions, fill = Response)) +
   geom_bar(stat="identity", width= 0.5, show.legend = FALSE) + 
   geom_text (aes(label = Proportions), position = position_dodge(0.1), vjust = -1) +
@@ -421,6 +429,10 @@ Y_G_188 <- as.data.frame(table(AP_Youth_Survey$Y_G_188)) %>%
 mutate (Proportions = round(Freq*100/sum(Freq),1)) %>% 
 rename ("Response" = Var1) %>% 
 rename ("Count" = Freq) 
+
+Y_G_188$Response <- as.factor(Y_G_188$Response)
+
+Y_G_188$Response <- factor(Y_G_188$Response, levels = c("Much Less", "Somewhat Less", "No Response", "Somewhat More", "Much More"))
 
 Y_G_188_plot <- ggplot(Y_G_188, aes(x= Response, y= Proportions, fill = Response)) +
   geom_bar(stat="identity", width= 0.5, show.legend = FALSE) + 
@@ -442,6 +454,10 @@ Y_G_189 <- as.data.frame(table(AP_Youth_Survey$Y_G_189)) %>%
 mutate (Proportions = round(Freq*100/sum(Freq),1)) %>% 
 rename ("Response" = Var1) %>% 
 rename ("Count" = Freq) 
+
+Y_G_189$Response <- as.factor(Y_G_189$Response)
+
+Y_G_189$Response <- factor(Y_G_189$Response, levels = c("Much Weaker", "Somewhat Weaker", "No Response", "Somewhat Stronger", "Much Stronger"))
 
 Y_G_189_plot <- ggplot(Y_G_189, aes(x= Response, y= Proportions, fill = Response)) +
   geom_bar(stat="identity", width= 0.5, show.legend = FALSE) + 
