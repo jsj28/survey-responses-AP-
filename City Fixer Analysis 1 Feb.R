@@ -4,9 +4,9 @@ library(readxl)
 library(writexl)
 
 #Main Files ####
-AP_Youth_Survey <- read_excel("youth_survey_responses (27th Jan).xlsx")
-AP_Household_Roster <- read_excel("Household Roster Youth Survey (27th Jan).xlsx")
-AP_Outmigration_Roster <- read_excel("Outmigration Roster Youth Survey (27th Jan).xlsx")
+AP_Youth_Survey <- read_excel("youth_survey_responses (1st Feb).xlsx")
+AP_Household_Roster <- read_excel("Household Roster Youth Survey (1st Feb).xlsx")
+AP_Outmigration_Roster <- read_excel("Outmigration Roster Youth Survey (1st Feb).xlsx")
 
 
 #Codebooks ####
@@ -95,7 +95,7 @@ v <- c("ELURU", "Eluru")
 AP_Youth_Survey$`City Name` <- ifelse(AP_Youth_Survey$`City Name` %in% v,
                                       "Eluru", AP_Youth_Survey$`City Name`)
 
-v <- c("Adoni", "ADONI", "ADINI")
+v <- c("Adoni", "ADONI", "ADINI", "1015")
 
 AP_Youth_Survey$`City Name` <- ifelse(AP_Youth_Survey$`City Name` %in% v,
                                       "Adoni", AP_Youth_Survey$`City Name`)
@@ -108,10 +108,12 @@ AP_Youth_Survey$`City Name` <- ifelse(AP_Youth_Survey$`City Name` %in% v,
 AP_Youth_Survey$`City Name` <- ifelse(AP_Youth_Survey$`City Name` == "KADAPA" | AP_Youth_Survey$`City Name` == "R NARASIMHA SAPTAGIRI",
                                       "Kadapa", AP_Youth_Survey$`City Name`)
 
-AP_Youth_Survey$`City Name` <- ifelse(AP_Youth_Survey$`City Name` == "PEDDHAPURAM",
+v <- c("PEDDHAPURAM", "PEDDAPURAM", "Pedhapuram")
+
+AP_Youth_Survey$`City Name` <- ifelse(AP_Youth_Survey$`City Name` %in% v,
                                       "Peddapuram", AP_Youth_Survey$`City Name`)
 
-write_xlsx(AP_Youth_Survey, "youth_survey_responses (27th Jan).xlsx")
+write_xlsx(AP_Youth_Survey, "youth_survey_responses (1st Feb).xlsx")
 
 City_Wise_Numbers <- as.data.frame(table(AP_Youth_Survey$`City Name`))
 
@@ -145,7 +147,7 @@ write_xlsx(AP_Household_NonSelf, "AP_Household_NonSelf_Responses.xlsx")
 AP_Youth_Survey_Merged <- merge(AP_Youth_Survey, AP_Household_Roster[AP_Household_Roster$H_1 == "Self",], by.x = c("_uuid"), by.y = c("_submission__uuid"))
 attr(AP_Youth_Survey_Merged, "variable.labels") <- c(AP_Youth_Survey_Codebook$Column_Name, AP_Household_Roster_Codebook$Column_Name[AP_Household_Roster_Codebook$Column_Name != "_submission__uuid"])
 
-write_xlsx(AP_Youth_Survey_Merged, "AP_YouthSurvey_Roster_Merged (Jan 27th).xlsx")
+write_xlsx(AP_Youth_Survey_Merged, "AP_YouthSurvey_Roster_Merged (Feb 1st).xlsx")
 
 
 #Tables to be created - A (Skilling Response Levels) ####
