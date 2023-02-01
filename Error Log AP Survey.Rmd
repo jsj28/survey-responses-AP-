@@ -52,9 +52,9 @@ newtheme <- theme_bw() +
         panel.grid.major = element_blank(), legend.position = "bottom")
 
 #Main Files ####
-AP_Youth_Survey <- read_excel("/Users/gurkirat/Desktop/Archive-2/youth_survey_responses (27th Jan).xlsx")
-AP_Household_Roster <- read_excel("/Users/gurkirat/Desktop/Archive-2/Household Roster Youth Survey (27th Jan).xlsx")
-AP_Outmigration_Roster <- read_excel("/Users/gurkirat/Desktop/Archive-2/Outmigration Roster Youth Survey (27th Jan).xlsx")
+AP_Youth_Survey <- read_excel("youth_survey_responses (27th Jan).xlsx")
+AP_Household_Roster <- read_excel("Household Roster Youth Survey (27th Jan).xlsx")
+AP_Outmigration_Roster <- read_excel("Outmigration Roster Youth Survey (27th Jan).xlsx")
 
 
 #Codebooks ####
@@ -686,7 +686,65 @@ rm(a1,a2,a3,a4,v)
 
 detach(AP_Youth_Survey)
 ```
+
+Enrolment and Interest by Type of Course:
+Sharing below absolute numbers for people currently enrolled in courses and those interested in taking them.
+
+```{r, echo = F, warning = F, out.width=500, out.height=150}
+#Category Wise Enrolment
+IT <- table(grepl(c("Information Technology"), AP_Youth_Survey$YR_F_87, ignore.case = T) | grepl(c("Computer"), AP_Youth_Survey$YR_F_87, ignore.case = T),
+            AP_Youth_Survey$Y_F_81)
+English <- table(grepl(c("English"), AP_Youth_Survey$YR_F_87, ignore.case = T) | grepl(c("Communication"), AP_Youth_Survey$YR_F_87, ignore.case = T),
+                 AP_Youth_Survey$Y_F_81)
+Competitive_Exam <- table(grepl(c("Competitive Exam"), AP_Youth_Survey$YR_F_87, ignore.case = T),
+                          AP_Youth_Survey$Y_F_81)
+Eng_Science <- table(grepl(c("Engineering"), AP_Youth_Survey$YR_F_87, ignore.case = T) | grepl(c("Science"), AP_Youth_Survey$YR_F_87, ignore.case = T),
+                     AP_Youth_Survey$Y_F_81)
+Repair <- table(grepl(c("Technical"), AP_Youth_Survey$YR_F_87, ignore.case = T) | grepl(c("Repair"), AP_Youth_Survey$YR_F_87, ignore.case = T),
+                AP_Youth_Survey$Y_F_81)
+Craftwork <- table(grepl(c("Craftwork"), AP_Youth_Survey$YR_F_87, ignore.case = T),
+                   AP_Youth_Survey$Y_F_81)
+
+cbl <- cbind(IT[2,], English[2,], Competitive_Exam[2,], Eng_Science[2,], Repair[2,], Craftwork[2,])
+colnames(cbl) <- c("IT", "English", "Competitive Exam", "Engineering/Science", "Technical/Repair", "Craftwork")
+
+cbl <- rbind(cbl, Total = colSums(cbl))
+
+cbl %>%
+  kbl(caption = "Distribution of Enrolment in Skilling Courses", align = "l")%>%
+  kable_classic(full_width = F, html_font = "Cambria", font_size = 11) %>%
+  row_spec(4, bold = T)
+
+```
+
+```{r, echo = F, warning = F, out.width=500, out.height=150}
+#Category wise Interest
+IT <- table(grepl(c("Information Technology"), AP_Youth_Survey$YR_F_92, ignore.case = T) | grepl(c("Computer"), AP_Youth_Survey$YR_F_92, ignore.case = T),
+            AP_Youth_Survey$Y_F_81)
+English <- table(grepl(c("English"), AP_Youth_Survey$YR_F_92, ignore.case = T) | grepl(c("Communication"), AP_Youth_Survey$YR_F_92, ignore.case = T),
+                 AP_Youth_Survey$Y_F_81)
+Competitive_Exam <- table(grepl(c("Competitive Exam"), AP_Youth_Survey$YR_F_92, ignore.case = T),
+                          AP_Youth_Survey$Y_F_81)
+Eng_Science <- table(grepl(c("Engineering"), AP_Youth_Survey$YR_F_92, ignore.case = T) | grepl(c("Science"), AP_Youth_Survey$YR_F_92, ignore.case = T),
+                     AP_Youth_Survey$Y_F_81)
+Repair <- table(grepl(c("Technical"), AP_Youth_Survey$YR_F_92, ignore.case = T) | grepl(c("Repair"), AP_Youth_Survey$YR_F_92, ignore.case = T),
+                AP_Youth_Survey$Y_F_81)
+Craftwork <- table(grepl(c("Craftwork"), AP_Youth_Survey$YR_F_92, ignore.case = T),
+                   AP_Youth_Survey$Y_F_81)
+
+cbl <- cbind(IT[2,], English[2,], Competitive_Exam[2,], Eng_Science[2,], Repair[2,], Craftwork[2,])
+colnames(cbl) <- c("IT", "English", "Competitive Exam", "Engineering/Science", "Technical/Repair", "Craftwork")
+
+cbl <- rbind(cbl, Total = colSums(cbl))
+
+cbl %>%
+  kbl(caption = "Distribution of Interest in Skilling Courses", align = "l")%>%
+  kable_classic(full_width = F, html_font = "Cambria", font_size = 11) %>%
+  row_spec(4, bold = T)
+
+```
 \newpage
+
 
 # Potential Next Steps
 
