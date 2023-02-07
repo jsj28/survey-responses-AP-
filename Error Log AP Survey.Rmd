@@ -52,9 +52,9 @@ newtheme <- theme_bw() +
         panel.grid.major = element_blank(), legend.position = "bottom")
 
 #Main Files ####
-AP_Youth_Survey <- read_excel("youth_survey_responses (1st Feb).xlsx")
-AP_Household_Roster <- read_excel("Household Roster Youth Survey (1st Feb).xlsx")
-AP_Outmigration_Roster <- read_excel("Outmigration Roster Youth Survey (1st Feb).xlsx")
+AP_Youth_Survey <- read_excel("youth_survey_responses (7th Feb).xlsx")
+AP_Household_Roster <- read_excel("Household Roster Youth Survey (7th Feb).xlsx")
+AP_Outmigration_Roster <- read_excel("Outmigration Roster Youth Survey (7th Feb).xlsx")
 
 
 #Codebooks ####
@@ -546,7 +546,7 @@ OO_LF <- c("Attending Domestic Duties", "Student", "Others", "Retired", NA)
 
 t <- as.data.frame(table(AP_Household_Roster$H_6[AP_Household_Roster$Age %in% 19:29 & (AP_Household_Roster$H_6 %in% OO_LF) == F]))
 
-bp <- barplot(100*prop.table(t$Freq), names.arg = wrap.labels(t$Var1, 20), ylim = c(0,50), border = NA, col = "coral2", main = "Structure of Employment Among Youth", xlab = "Primary Activity", ylab = "Percentage of Labour Force", cex.names = 0.75)
+bp <- barplot(100*prop.table(t$Freq), names.arg = wrap.labels(t$Var1, 20), ylim = c(0,50), border = NA, col = "darkblue", main = "Structure of Employment Among Youth", xlab = "Primary Activity", ylab = "Percentage of Labour Force", cex.names = 0.75)
 text(bp, 100*prop.table(t$Freq), round(100*prop.table(t$Freq)), pos = 3)
 
 ```
@@ -558,7 +558,7 @@ OO_LF <- c("Attending Domestic Duties", "Student", "Others", "Retired", NA)
 
 t <- as.data.frame(table(AP_Household_Roster$H_6[AP_Household_Roster$Age > 30 & (AP_Household_Roster$H_6 %in% OO_LF) == F]))
 
-bp <- barplot(100*prop.table(t$Freq), names.arg = wrap.labels(t$Var1, 20), ylim = c(0,50), border = NA, col = "coral2", main = "Structure of Employment Among Adults (30+)", xlab = "Primary Activity", ylab = "Percentage of Labour Force", cex.names = 0.75)
+bp <- barplot(100*prop.table(t$Freq), names.arg = wrap.labels(t$Var1, 20), ylim = c(0,50), border = NA, col = "darkred", main = "Structure of Employment Among Adults (30+)", xlab = "Primary Activity", ylab = "Percentage of Labour Force", cex.names = 0.75)
 text(bp, 100*prop.table(t$Freq), round(100*prop.table(t$Freq)), pos = 3)
 
 ```
@@ -569,24 +569,19 @@ Breakdown of youth into separate groups
 ```{r, echo=F, warning=F, fig.width=10, fig.height=6}
 OO_LF <- c("Attending Domestic Duties", "Student", "Others", "Retired", NA)
 
-t <- as.data.frame(table(AP_Household_Roster$H_6[AP_Household_Roster$Age %in% 19:24 & (AP_Household_Roster$H_6 %in% OO_LF) == F]))
+t1 <- as.data.frame(table(AP_Household_Roster$H_6[AP_Household_Roster$Age %in% 19:24 & (AP_Household_Roster$H_6 %in% OO_LF) == F]))
 
-bp <- barplot(100*prop.table(t$Freq), names.arg = wrap.labels(t$Var1, 20), ylim = c(0,50), border = NA, col = "coral2", main = "Structure of Employment Among Youth (19-24)", xlab = "Primary Activity", ylab = "Percentage of Labour Force", cex.names = 0.75)
-text(bp, 100*prop.table(t$Freq), round(100*prop.table(t$Freq)), pos = 3)
+t2 <- as.data.frame(table(AP_Household_Roster$H_6[AP_Household_Roster$Age %in% 25:29 & (AP_Household_Roster$H_6 %in% OO_LF) == F]))
 
+x <- as.matrix(cbind(100*prop.table(t1$Freq), 100*prop.table(t2$Freq)))
 
-OO_LF <- c("Attending Domestic Duties", "Student", "Others", "Retired", NA)
+bp <- barplot(t(x), beside = T, names.arg = wrap.labels(t1$Var1, 20), ylim = c(0,50), border = "white", col = c("coral2", "dodgerblue"), main = "Structure of Employment Among Youth", xlab = "Primary Activity", ylab = "Percentage of Labour Force", cex.names = 0.75, legend.text = c("Ages 19-24", "Ages 25-29"), args.legend = list(x = "top", bty = "n", border = "white", horiz = T))
 
-t <- as.data.frame(table(AP_Household_Roster$H_6[AP_Household_Roster$Age %in% 25:29 & (AP_Household_Roster$H_6 %in% OO_LF) == F]))
-
-bp <- barplot(100*prop.table(t$Freq), names.arg = wrap.labels(t$Var1, 20), ylim = c(0,50), border = NA, col = "dodgerblue", main = "Structure of Employment Among Youth (25-29)", xlab = "Primary Activity", ylab = "Percentage of Labour Force", cex.names = 0.75)
-text(bp, 100*prop.table(t$Freq), round(100*prop.table(t$Freq)), pos = 3)
+text(bp, t(x), round(t(x)), pos = 3, cex = 0.75)
 
 ```
-\newpage
 
 Breakdown of employment structure by gender. 
-Male - Blue, Female - Red
 
 ```{r, echo=F, warning=F, fig.width=10, fig.height=6}
 OO_LF <- c("Attending Domestic Duties", "Student", "Others", "Retired")
@@ -599,9 +594,12 @@ t2$Freq <- t2$Freq/sum(t2$Freq)
 
 t <- merge(t1, t2, by = c("Var1"))
 
-bp <- barplot(t(100*t[,c(2:3)]), beside = T, names.arg = wrap.labels(t$Var1, 20), ylim = c(0,50), border = "white", col = c("dodgerblue","coral2"), main = "Structure of Employment Among Youth (by Gender)", xlab = "Primary Activity", ylab = "Percentage of Labour Force", cex.names = 0.8)
+bp <- barplot(t(100*t[,c(2:3)]), beside = T, names.arg = wrap.labels(t$Var1, 20), ylim = c(0,50), border = "white", col = c("dodgerblue","coral2"), main = "Structure of Employment Among Youth (by Gender)", xlab = "Primary Activity", ylab = "Percentage of Labour Force", cex.names = 0.8, legend.text = c("Male", "Female"), args.legend = list(x = "top", bty = "n", border = "white", horiz = T))
 
+text(bp, 100*t(t[,-1]), round(100*t(t[,-1])), pos = 3, cex = 0.75)
 ```
+
+\newpage
 
 
 Skilling - We are mainly analysing three things. First, have you taken a course already (Enrolment). Second, do you think any of the skilling courses would be beneficial (Interested). Finally, would youenroll in one (Intent). 
@@ -642,7 +640,6 @@ text(bp, v, round(v, 1), pos = 3)
 rm(a1,a2,a3,a4,v)
 
 ```
-\newpage
 
 Interest in taking Skilling Courses -
 Q. Would skill training in any of the following areas be beneficial for your professional goals?
@@ -664,6 +661,8 @@ text(bp, v, round(v, 1), pos = 3)
 
 rm(a1,a2,a3,a4,v)
 ```
+\newpage
+
 
 Intention of Interested Respondents to Take Courses
 Q. Do you intend to take up formal or informal courses for this skills training in the near future?
@@ -743,8 +742,9 @@ cbl %>%
   row_spec(4, bold = T)
 
 ```
-\newpage
 
+
+\newpage
 
 # Potential Next Steps
 
