@@ -238,4 +238,21 @@ AP_Youth_Survey$YR_F_92 <- ifelse(AP_Youth_Survey$Y_F_81 == "Student", AP_Youth_
 AP_Youth_Survey$YR_F_94 <- ifelse(AP_Youth_Survey$Y_F_81 == "Student", AP_Youth_Survey$Y_F_94,
                                   ifelse(AP_Youth_Survey$Y_F_81 == "Employed", AP_Youth_Survey$Y_F_130, AP_Youth_Survey$Y_F_167))
 
-  
+
+#Adding City Size Class for Analysis
+#According to our data - The cities should be classified as follows
+
+Small <- c("Kadiri", "Peddapuram", "Rayadurga") #Less than 1 Lakh
+Medium <- c("Adoni", "Eluru", "Hindupur", "Kadapa", "Kakinada", "Narasaraopet", "Rajahmundry",
+            "Tadipatri", "Tenali", "Tirupati")#1-4 Lakhs
+Large <- c("Guntur", "Visakhapatnam", "Kurnool", "Nellore", "Vijayawada") #More than 4 Lakhs
+
+
+
+AP_Youth_Survey$City_Size_Class <- ifelse(AP_Youth_Survey$`City Name`%in% Small, "Small",
+                                          ifelse(AP_Youth_Survey$`City Name` %in% Medium, "Medium",
+                                                 ifelse(AP_Youth_Survey$`City Name` %in% Large, "Large",
+                                                        "NAN")))
+
+
+prop.table(table(AP_Youth_Survey$Y_G_189, AP_Youth_Survey$City_Size_Class), 2)
