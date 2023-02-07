@@ -34,7 +34,9 @@ v <- c("GVMC(VISAKHAPATNAM)", "Gvmc visakhapatnam", "GVMC (VISAKHAPATNAM)", "Gvm
        "GVMC visakhapatnam", "GVMC VISAKHAPATNAM", "GVMC VISHAKAPATNAM", "Gvmc(Visakhapatnam)",
        "GVMC(VISAKHAPATNAM)", "VISAKHAPATNAM", "GVMC ( VISAKHAPATNAM )", "GVMC (VISAKHAPATNAM )",
        "Gvmc visakapatnam", "GVMC Visakhapatnam", "GVMC Vishakhapatnam", "GVMC VISKHAPATNAM", 
-       "GVMC(VISAKHAPATNAM,)", "Viskhapatnam GVMC", "Viskhapatnam (GVMC)")
+       "GVMC(VISAKHAPATNAM,)", "Viskhapatnam GVMC", "Viskhapatnam (GVMC)", "Gvmc ( visakhapatnam )",
+       "GVMC ( VISAKHAPATNAM)", "GVMC (Visakhapatnam )", "GVMC Visakapatnam", "GVMC VISAKAPATNAM",
+       "GvMC Visakhapatnam", "Gvmc vishakapatnam", "GVMC Vishakapatnam", "Visakhaptnam")
 
 AP_Youth_Survey$`City Name` <- ifelse(AP_Youth_Survey$`City Name` %in% v,
                                       "Visakhapatnam", AP_Youth_Survey$`City Name`)
@@ -255,4 +257,5 @@ AP_Youth_Survey$City_Size_Class <- ifelse(AP_Youth_Survey$`City Name`%in% Small,
                                                         "NAN")))
 
 
-prop.table(table(AP_Youth_Survey$Y_G_189, AP_Youth_Survey$City_Size_Class), 2)
+
+
