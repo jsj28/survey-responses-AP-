@@ -36,7 +36,8 @@ v <- c("GVMC(VISAKHAPATNAM)", "Gvmc visakhapatnam", "GVMC (VISAKHAPATNAM)", "Gvm
        "Gvmc visakapatnam", "GVMC Visakhapatnam", "GVMC Vishakhapatnam", "GVMC VISKHAPATNAM", 
        "GVMC(VISAKHAPATNAM,)", "Viskhapatnam GVMC", "Viskhapatnam (GVMC)", "Gvmc ( visakhapatnam )",
        "GVMC ( VISAKHAPATNAM)", "GVMC (Visakhapatnam )", "GVMC Visakapatnam", "GVMC VISAKAPATNAM",
-       "GvMC Visakhapatnam", "Gvmc vishakapatnam", "GVMC Vishakapatnam", "Visakhaptnam")
+       "GvMC Visakhapatnam", "Gvmc vishakapatnam", "GVMC Vishakapatnam", "Visakhaptnam", "GVMC",
+       "GVMC (Visakhapatnam", "Gvmc Visakhaption", "Visakhapatnam GVMC", "Viskhapatnam")
 
 AP_Youth_Survey$`City Name` <- ifelse(AP_Youth_Survey$`City Name` %in% v,
                                       "Visakhapatnam", AP_Youth_Survey$`City Name`)
@@ -54,7 +55,7 @@ AP_Youth_Survey$`City Name` <- ifelse(AP_Youth_Survey$`City Name` %in% v,
                                       "Tadipatri", AP_Youth_Survey$`City Name`)
 
 
-v <- c("KURNOOL", "Kurnool", "kurnool", "Kurnnol", "1016")
+v <- c("KURNOOL", "Kurnool", "kurnool", "Kurnnol", "1016", "Kurnool\n")
 
 AP_Youth_Survey$`City Name` <- ifelse(AP_Youth_Survey$`City Name` %in% v,
                                       "Kurnool", AP_Youth_Survey$`City Name`)
