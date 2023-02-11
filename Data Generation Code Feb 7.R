@@ -30,7 +30,7 @@ match(ys5,ys4) %in% c(1:213)
 youth_survey_responses <- rbind(youth_survey_responses, ys_responses_5)
 
 
-ys_responses_6 <- read_excel("/Users/vaibhav/Documents/CPR\ -\ Work/AP\ Project/Youth_Survey_Social_Audit_test_-_all_versions_-_English_en_-_2023-02-07-16-06-27.xlsx")
+ys_responses_6 <- read_excel("/Users/vaibhav/Documents/CPR\ -\ Work/AP\ Project/Youth_Survey_Social_Audit_test_-_all_versions_-_English_en_-_2023-02-09-07-59-18.xlsx")
 
 ys6 <- colnames(ys_responses_6)
 
@@ -80,13 +80,15 @@ match(ys5,ys4) %in% c(1:38)
 Household_Roster <- rbind(Household_Roster, ys_responses_5)
 
 
-ys_responses_6 <- read_excel("/Users/vaibhav/Documents/CPR\ -\ Work/AP\ Project/Youth_Survey_Social_Audit_test_-_all_versions_-_English_en_-_2023-02-07-16-06-27.xlsx", sheet = 2)
+ys_responses_6 <- read_excel("/Users/vaibhav/Documents/CPR\ -\ Work/AP\ Project/Youth_Survey_Social_Audit_test_-_all_versions_-_English_en_-_2023-02-09-07-59-18.xlsx", sheet = 2)
 
 ys6 <- colnames(ys_responses_6)
 
 match(ys4,ys6) %in% c(1:38)
 
 a <- as.data.frame(cbind(ys6,ys4, ys6 == ys4))
+
+ys_responses_6 <- ys_responses_6[,c(-38)]
 
 Household_Roster <- rbind(Household_Roster, ys_responses_6)
 
@@ -121,11 +123,13 @@ match(ys5,ys4) %in% c(1:38)
 
 Outmigration_Roster <- rbind(Outmigration_Roster, ys_responses_5)
 
-ys_responses_6 <- read_excel("/Users/vaibhav/Documents/CPR\ -\ Work/AP\ Project/Youth_Survey_Social_Audit_test_-_all_versions_-_English_en_-_2023-02-07-16-06-27.xlsx", sheet = 3)
+ys_responses_6 <- read_excel("/Users/vaibhav/Documents/CPR\ -\ Work/AP\ Project/Youth_Survey_Social_Audit_test_-_all_versions_-_English_en_-_2023-02-09-07-59-18.xlsx", sheet = 3)
 
 ys6 <- colnames(ys_responses_6)
 
 a <- as.data.frame(cbind(ys6,ys4, ys6 == ys4))
+
+ys_responses_6 <- ys_responses_6[,c(-18)]
 
 Outmigration_Roster <- rbind(Outmigration_Roster, ys_responses_6)
 

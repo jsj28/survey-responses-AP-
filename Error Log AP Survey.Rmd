@@ -149,7 +149,7 @@ Child_MisClass[,c(1:8)]
 
 ## Marital Status of Children
 
-Marital status and children crosscheck - are there a lot of children?
+Marital status and children crosscheck - 8 children classified as married
 
 
 ## Disparities between Sector and Roster Occupation
