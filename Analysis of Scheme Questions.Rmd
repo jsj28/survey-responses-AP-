@@ -1,0 +1,467 @@
+---
+title: "Analysis of Scheme questions"
+author: "Gurkirat"
+date: "11/02/2023"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(data.table)
+library(readxl)
+library(writexl)
+library(haven)
+library(readr)
+library(dplyr)
+library(cowplot)
+library(tidyverse)
+library(ggplot2)
+library(MASS)
+library(ggrepel)
+library(RColorBrewer)
+library(stargazer)
+library(DeclareDesign)
+library(texreg)
+library(car)
+library(lubridate)
+library(scales)
+library(cowplot)
+library(writexl)
+library(janitor)
+library(gridExtra)
+library(grid)
+library(ggpubr)
+library(kableExtra)
+library(data.table)
+library(foreign)
+library(readxl)
+library(knitr)
+library(tinytex)
+
+##Plot theme
+newtheme <- theme_bw() +
+  theme(panel.border = element_rect(color = "darkgrey", size = 2), 
+        panel.grid.major = element_blank(), legend.position = "bottom")
+```
+
+I. Support for Education
+```{r}
+A <- AP_Youth_Survey
+
+ammavodi <- A[grep("Ammavodi", A$Y_E_55), ]
+jvd <- A[grep("Jagananna Vidya Deevena", A$Y_E_55), ]
+jvvd <- A[grep("Jagananna VasathI Deevena", A$Y_E_55), ]
+jvk <- A[grep("Jagananna Vidya Kanuka", A$Y_E_55), ]
+rte <- A[grep("Right to Education", A$Y_E_55), ]
+pms <- A[grep("Pre-Matric Scholarship", A$Y_E_55), ]
+fls <- A[grep("Free Laptop Scheme", A$Y_E_55), ]
+other <- A[grep("Other", A$Y_E_55), ]
+
+beneficiaries <- c(nrow(ammavodi), nrow(jvd), nrow(jvvd), nrow(jvk), nrow(rte), nrow(pms), nrow(fls), nrow(other))
+Scheme <- c("Ammavodi", "Jagananna Vidya Deevena", "Jagananna Vasathi Deevena", "Jagananna Vidya Kanuka", "Right to Education", "Pre-Matric Scholarship", "Free Laptop Scheme", "Others")
+
+edbenefits_dta <- data.frame (Scheme, beneficiaries) %>%
+mutate (Proportions = round(beneficiaries*100/sum(beneficiaries),1))
+
+edbenefits_dta$Scheme <- as.factor(edbenefits_dta$Scheme)
+edbenefits_dta$Scheme <- factor(edbenefits_dta$Scheme, levels = c("Ammavodi", "Jagananna Vidya Deevena", "Jagananna Vasathi Deevena", "Jagananna Vidya Kanuka", "Right to Education", "Others", "Free Laptop Scheme", "Pre-Matric Scholarship"))
+
+
+edbenefits_plot <- ggplot(edbenefits_dta, aes(x= Scheme, y= Proportions, fill = Scheme)) +
+  geom_bar(stat="identity", width= 0.5, show.legend = FALSE) + 
+  geom_text (aes(label = Proportions), position = position_dodge(0.1), vjust = -1) +
+  scale_y_continuous(limits = c(0,50)) +
+  scale_x_discrete(labels = function(`Scheme`) str_wrap(`Scheme`, width = 10)) +
+  scale_fill_brewer(palette="YlGnBu") +
+  labs(x="",y="Percentage", subtitle = "Support for Education") + newtheme
+
+edbenefits_plot
+```
+
+II. Support for Health
+```{r}
+arogyasri <- A[grep("Arogyasri", A$Y_E_60), ]
+pmjay <- A[grep("Pradhan Mantri Jan Aarogya Yojana", A$Y_E_60), ]
+fh <- A[grep("Free Hospitalization", A$Y_E_60), ]
+jsy <- A[grep("Janani Suraksha Yojana", A$Y_E_60), ]
+pmmvy <- A[grep("Pradhan Mantri Matru Vandana Yojana", A$Y_E_60), ]
+other <- A[grep("Other", A$Y_E_60), ]
+
+beneficiaries <- c(nrow(arogyasri), nrow(pmjay), nrow(fh), nrow(jsy), nrow(pmmvy), nrow(other))
+Scheme <- c("Arogyasri", "Pradhan Mantri Jan Aarogya Yojana (PMJAY)", "Free Hospitalization", "Janani Suraksha Yojana", "Pradhan Mantri Matru Vandana Yojana (PMMVY)", "Others")
+
+healthbenefits_dta <- data.frame (Scheme, beneficiaries) %>%
+mutate (Proportions = round(beneficiaries*100/sum(beneficiaries),1))
+
+healthbenefits_dta$Scheme <- factor(healthbenefits_dta$Scheme, levels = c("Arogyasri", "Free Hospitalization", "Pradhan Mantri Jan Aarogya Yojana (PMJAY)", "Janani Suraksha Yojana", "Pradhan Mantri Matru Vandana Yojana (PMMVY)", "Others"))
+
+
+healthbenefits_plot <- ggplot(healthbenefits_dta, aes(x= Scheme, y= Proportions, fill = Scheme)) +
+  geom_bar(stat="identity", width= 0.5, show.legend = FALSE) + 
+  geom_text (aes(label = Proportions), position = position_dodge(0.1), vjust = -1) +
+  scale_y_continuous(limits = c(0,100)) +
+  scale_x_discrete(labels = function(`Scheme`) str_wrap(`Scheme`, width = 10)) +
+  scale_fill_brewer(palette="YlGnBu") +
+  labs(x="",y="Percentage", subtitle = "Support for Health") + newtheme
+
+healthbenefits_plot
+```
+
+III. Support for Housing
+```{r}
+illu <- A[grep("Pedalandariki Illu", A$Y_E_50), ]
+pmay <- A[grep("Pradhan Mantri Awaas Yojana", A$Y_E_50), ]
+ray <- A[grep("RAY", A$Y_E_50), ]
+other <- A[grep("Other", A$Y_E_50), ]
+
+beneficiaries <- c(nrow(illu), nrow(pmay), nrow(ray), nrow(other))
+Scheme <- c("Pedalandariki Illu", "Pradhan Mantri Awaas Yojana", "RAY (Rajeev Awas Yojana)", "Others")
+
+housingbenefits_dta <- data.frame (Scheme, beneficiaries) %>%
+mutate (Proportions = round(beneficiaries*100/sum(beneficiaries),1))
+
+housingbenefits_dta$Scheme <- factor(housingbenefits_dta$Scheme, levels = c("Pedalandariki Illu", "Pradhan Mantri Awaas Yojana", "RAY (Rajeev Awas Yojana)", "Others"))
+
+housingbenefits_plot <- ggplot(housingbenefits_dta, aes(x= Scheme, y= Proportions, fill = Scheme)) +
+  geom_bar(stat="identity", width= 0.5, show.legend = FALSE) + 
+  geom_text (aes(label = Proportions), position = position_dodge(0.1), vjust = -1) +
+  scale_y_continuous(limits = c(0,100)) +
+  scale_x_discrete(labels = function(`Scheme`) str_wrap(`Scheme`, width = 10)) +
+  scale_fill_brewer(palette="YlGnBu") +
+  labs(x="",y="Percentage", subtitle = "Support for Housing") + newtheme
+
+housingbenefits_plot
+
+```
+IV. Cash Support (DBT)
+```{r}
+pensions <- A[grep("Pension", A$Y_E_65), ]
+pmkisan <- A[grep("PM Kisan", A$Y_E_65), ]
+cheyutha <- A[grep("YSR Cheyutha", A$Y_E_65), ]
+kapuneshtam <- A[grep("YSR Kapu Neshtam", A$Y_E_65), ]
+ebcneshtam <- A[grep("YSR EBC Neshtam", A$Y_E_65), ]
+Others <- A[grep("Other", A$Y_E_65), ]
+rythubharosa <- A[grep("Rythu Bharosa", A$Y_E_65), ]
+
+beneficiaries <- c(nrow(pensions), nrow(pmkisan), nrow(cheyutha), nrow(kapuneshtam), nrow(ebcneshtam), nrow(Others), nrow(rythubharosa))
+Scheme <- c("Pension", "PM Kisan", "YSR Cheyutha", "YSR Kapu Neshtam", "YSR EBC Neshtam", "Others", "Rythu Bharosa")
+
+cashbenefits_dta <- data.frame (Scheme, beneficiaries) %>%
+mutate (Proportions = round(beneficiaries*100/sum(beneficiaries),1))
+
+cashbenefits_dta$Scheme <- factor(cashbenefits_dta$Scheme, levels = c("Pension", "YSR Cheyutha", "Rythu Bharosa", "YSR Kapu Neshtam", "PM Kisan", "YSR EBC Neshtam", "Others"))
+
+cashbenefits_plot <- ggplot(cashbenefits_dta, aes(x= Scheme, y= Proportions, fill = Scheme)) +
+  geom_bar(stat="identity", width= 0.5, show.legend = FALSE) + 
+  geom_text (aes(label = Proportions), position = position_dodge(0.1), vjust = -1) +
+  scale_y_continuous(limits = c(0,100)) +
+  scale_x_discrete(labels = function(`Scheme`) str_wrap(`Scheme`, width = 10)) +
+  scale_fill_brewer(palette="YlGnBu") +
+  labs(x="",y="Percentage", subtitle = "Cash Support") + newtheme
+
+cashbenefits_plot
+
+```
+V. Business Support, Loan Support & Loan Forgiveness
+```{r}
+mudra <- A[grep("MUDRA", A$Y_E_70), ]
+aasara <- A[grep("YSR Aasara", A$Y_E_70), ]
+adarsham <- A[grep("YSR Adarsham", A$Y_E_70), ]
+sunnavaddi <- A[grep("YSR Sunna Vaddi", A$Y_E_70), ]
+Others <- A[grep("Other", A$Y_E_70), ]
+
+beneficiaries <- c(nrow(mudra), nrow(aasara),nrow(adarsham), nrow(sunnavaddi), nrow(Others))
+Scheme <- c("MUDRA", "YSR Aasara", "YSR Adarsham", "YSR Sunna Vaddi", "Others")
+
+loanbenefits_dta <- data.frame (Scheme, beneficiaries) %>%
+mutate (Proportions = round(beneficiaries*100/sum(beneficiaries),1))
+
+loanbenefits_dta$Scheme <- factor(loanbenefits_dta$Scheme, levels = c("YSR Sunna Vaddi", "YSR Aasara", "Others", "MUDRA", "YSR Adarsham"))
+
+loanbenefits_plot <- ggplot(loanbenefits_dta, aes(x= Scheme, y= Proportions, fill = Scheme)) +
+  geom_bar(stat="identity", width= 0.5, show.legend = FALSE) + 
+  geom_text (aes(label = Proportions), position = position_dodge(0.1), vjust = -1) +
+  scale_y_continuous(limits = c(0,100)) +
+  scale_x_discrete(labels = function(`Scheme`) str_wrap(`Scheme`, width = 10)) +
+  scale_fill_brewer(palette="YlGnBu") +
+  labs(x="",y="Percentage", subtitle = "Business Support, Loan Support & Loan Forgiveness") + newtheme
+
+loanbenefits_plot
+
+```
+VI. Support for Household Services & Infrastructure
+
+```{r}
+sanitation <- A[grep("Sanitation", A$Y_E_75), ]
+watersupply <- A[grep("Water supply", A$Y_E_75), ]
+lpg <- A[grep("LPG", A$Y_E_75), ]
+childcare <- A[grep("To take care of children", A$Y_E_75), ]
+disability <- A[grep("disability", A$Y_E_75), ]
+pension <- A[grep("Pension", A$Y_E_75), ]
+
+beneficiaries <- c(nrow(sanitation), nrow(watersupply), nrow(lpg), nrow(childcare), nrow(disability), nrow(pension))
+Scheme <- c("Sanitation", "Water supply", "LPG", "To take care of children", "To take care of person(s) with disability", "Pensions")
+
+services_dta <- data.frame (Scheme, beneficiaries) %>%
+mutate (Proportions = round(beneficiaries*100/sum(beneficiaries),1))
+
+services_dta$Scheme <- factor(services_dta$Scheme, levels = c("Water supply", "Sanitation", "LPG", "Pensions" , "To take care of children", "To take care of person(s) with disability"))
+
+services_plot <- ggplot(services_dta, aes(x= Scheme, y= Proportions, fill = Scheme)) +
+  geom_bar(stat="identity", width= 0.5, show.legend = FALSE) + 
+  geom_text (aes(label = Proportions), position = position_dodge(0.1), vjust = -1) +
+  scale_y_continuous(limits = c(0,100)) +
+  scale_x_discrete(labels = function(`Scheme`) str_wrap(`Scheme`, width = 10)) +
+  scale_fill_brewer(palette="YlGnBu") +
+  labs(x="",y="Percentage", subtitle = "Support for Household Services & Infrastructure") + newtheme
+
+services_plot
+```
+
+VII. Attribution Questions
+```{r}
+Y_E_80 <- as.data.frame(table(AP_Youth_Survey$Y_E_80)) %>% 
+mutate (Proportions = round(Freq*100/sum(Freq),1)) %>% 
+rename ("Response" = Var1) %>% 
+rename ("Count" = Freq) 
+
+Y_E_80$Response <- as.factor(Y_E_80$Response)
+
+Y_E_80$Response <- factor(Y_E_80$Response, levels = c("Chief Minister", "Government Officials", "Don't know", "Ward Councillor", "MLA", "Prime Minister", "MP"))
+
+Y_E_80_plot <- ggplot(Y_E_80, aes(x= Response, y= Proportions, fill = Response)) +
+  geom_bar(stat="identity", width= 0.5, show.legend = FALSE) + 
+  geom_text (aes(label = Proportions), position = position_dodge(0.1), vjust = -1) +
+  scale_y_continuous(limits = c(0,80)) +
+  scale_x_discrete(labels = function(`Response`) str_wrap(`Response`, width = 10)) +
+  #scale_fill_brewer(palette="YlGnBu") +
+  labs(x="",y="Percentage", subtitle = "Attribution of Credit (by position)") + newtheme
+
+Y_E_80_plot
+```
+VIII. Visualizing respondents not covered by schemes
+```{r}
+No_housing <- A[grep("No", A$Y_E_50), ]
+No_education <- A[grep("No", A$Y_E_55), ]
+No_health <- A[grep("No", A$Y_E_60), ]
+No_cashsupport <- A[grep("No", A$Y_E_65), ]
+No_loan <- A[grep("No", A$Y_E_70), ]
+No_services <- A[grep("No", A$Y_E_75), ]
+
+no_responses <- c(nrow(No_housing), nrow(No_education), nrow(No_health), nrow(No_cashsupport), nrow(No_loan), nrow(No_services))
+Benefits <- c("Housing", "Education", "Health", "Cash Support", "Debt Support, Business Support & Loan Forgiveness", "Household Services and Infrastructure")
+
+not_recieved <- data.frame(Benefits, no_responses)
+
+
+not_recieved <- not_recieved %>% 
+mutate ("Proportions (Not Recieved)" = round(no_responses*100/sum(no_responses),1)) %>% 
+dplyr::select(-no_responses)
+
+unknown_housing <- A[grep("Don't Know", A$Y_E_50), ]
+unknown_education <- A[grep("Don't know", A$Y_E_55), ]
+unknown_health <- A[grep("Don't know", A$Y_E_60), ]
+unknown_cashsupport <- A[grep("Don't Know", A$Y_E_65), ]
+unknown_loan <- A[grep("Don't Know", A$Y_E_70), ]
+unknown_services <- A[grep("Don't Know", A$Y_E_75), ]
+
+no_responses <- c(nrow(unknown_housing), nrow(unknown_education), nrow(unknown_health), nrow(unknown_cashsupport), nrow(unknown_loan), nrow(unknown_services))
+Benefitss <- c("Housing", "Education", "Health", "Cash Support", "Debt Support, Business Support & Loan Forgiveness", "Household Services and Infrastructure")
+group <- c("Didn't know", "Didn't know", "Didn't know", "Didn't know", "Didn't know", "Didn't know")
+
+unknown <- data.frame(Benefitss, no_responses)
+
+unknown <- unknown %>% 
+mutate ("Proportions (Didn't know)" = round(no_responses*100/sum(no_responses),1)) %>% 
+dplyr::select(-no_responses)
+
+unknown_noresponse <- cbind(not_recieved, unknown) %>% 
+dplyr::select (-Benefitss)
+
+unknown_noresponse %>% 
+kbl(caption = "Support to Citizens: Not Recieved or Didn't know ", align = "l")%>%
+  kable_classic(full_width = F, html_font = "Cambria", font_size = 15)
+```
+
+```{r}
+##Organizing Outcome Variables
+
+#Support for Housing
+y1 <- ifelse(AP_Youth_Survey_Merged$Y_E_50 == "No", 0, 1)
+
+#Support for Education
+y2 <- ifelse(AP_Youth_Survey_Merged$Y_E_55 == "No", 0, 1)
+
+#Support for Health
+y3 <- ifelse(AP_Youth_Survey_Merged$Y_E_60 == "No", 0, 1)
+
+#Cash Support
+y4 <- ifelse(AP_Youth_Survey_Merged$Y_E_65 == "No", 0, 1)
+
+#Business Support & Debt Support
+y5 <- ifelse(AP_Youth_Survey_Merged$Y_E_70 == "No", 0, 1)
+
+#Household Services & Infrastructure
+y6 <- ifelse(AP_Youth_Survey_Merged$Y_E_75 == "No", 0, 1)
+
+##Organising Predictors
+age <- AP_Youth_Survey_Merged$Age
+
+male <- ifelse(AP_Youth_Survey_Merged$Gender == "Male", 1, 0)
+female <- ifelse(AP_Youth_Survey_Merged$Gender == "Female", 1, 0)
+
+rel_hindu <- ifelse(AP_Youth_Survey_Merged$Y_A_13 == "Hinduism", 1, 0)
+rel_muslim <- ifelse(AP_Youth_Survey_Merged$Y_A_13 == "Islam", 1, 0)
+rel_christ <- ifelse(AP_Youth_Survey_Merged$Y_A_13 == "Christianity", 1, 0)
+rel_others <- ifelse((AP_Youth_Survey_Merged$Y_A_13 %in% c("Christianity", "Hinduism", "Islam")) == F, 1, 0)
+
+
+caste_gen <- ifelse(AP_Youth_Survey_Merged$Y_A_15 == "General (OC)", 1, 0)
+caste_sc <- ifelse(AP_Youth_Survey_Merged$Y_A_15 == "Scheduled Caste (SC)", 1, 0)
+caste_st <- ifelse(AP_Youth_Survey_Merged$Y_A_15 == "Scheduled Tribe (ST)", 1, 0)
+caste_bc <- ifelse(AP_Youth_Survey_Merged$Y_A_15 == "Backward Caste (BC)", 1, 0)
+caste_others <- ifelse((AP_Youth_Survey_Merged$Y_A_15 %in% c("Backward Caste (BC)", "Scheduled Tribe (ST)", "Scheduled Caste (SC)", "General (OC)")) == F, 1, 0)
+
+prim_act <- AP_Youth_Survey_Merged$Y_F_81
+
+city_size <- AP_Youth_Survey_Merged$City_Size_Class
+```
+
+
+```{r}
+#Housing: Running the model and getting a probability estimate 
+logit.fit.1 <- glm(y1 ~ age + female + factor(prim_act) + factor(city_size) + rel_others + rel_muslim + rel_christ + caste_others + caste_sc + caste_st + caste_bc, family=binomial(link = "logit")) 
+summary(logit.fit.1)
+
+logit.fit.1$coefficients
+
+x <- c(1,25, 0, 0, 0, 0, 0,0,0,0,0,0,0)  ## OC, Hindu, Employed, Big City, Male
+
+invlogit(logit.fit.1$coefficients %*% x)
+
+
+#Simulations to generate predicted values
+x <- c(1,25, 0, 0, 0, 0, 0,0,0,0,0,0,0)
+
+set.seed(1234)
+sim.coef <- mvrnorm(15000, logit.fit.1$coefficients, vcov(logit.fit.1))
+
+predvals.sim.0 <- invlogit(sim.coef %*% x)
+
+quantile(predvals.sim.0, seq(0,1,0.01))
+```
+
+```{r}
+#Education: Running the model and getting a probability estimate 
+logit.fit.2 <- glm(y2 ~ age + female + factor(prim_act) + factor(city_size) + rel_others + rel_muslim + rel_christ + caste_others + caste_sc + caste_st + caste_bc, family=binomial(link = "logit")) 
+summary(logit.fit.2)
+
+logit.fit.2$coefficients
+
+x <- c(1,25, 0, 0, 0, 0, 0,0,0,0,0,0,0)  ## OC, Hindu, Employed, Big City, Male
+
+invlogit(logit.fit.2$coefficients %*% x)
+
+
+#Simulations to generate predicted values
+x <- c(1,25, 0, 0, 0, 0, 0,0,0,0,0,0,0)
+
+set.seed(1234)
+sim.coef <- mvrnorm(15000, logit.fit.2$coefficients, vcov(logit.fit.2))
+
+predvals.sim.0 <- invlogit(sim.coef %*% x)
+
+quantile(predvals.sim.0, seq(0,1,0.01))
+```
+
+```{r}
+#Health: Running the model and getting a probability estimate 
+logit.fit.3 <- glm(y3 ~ age + female + factor(prim_act) + factor(city_size) + rel_others + rel_muslim + rel_christ + caste_others + caste_sc + caste_st + caste_bc, family=binomial(link = "logit")) 
+summary(logit.fit.3)
+
+logit.fit.3$coefficients
+
+x <- c(1,25, 0, 0, 0, 0, 0,0,0,0,0,0,0)  ## OC, Hindu, Employed, Big City, Male
+
+invlogit(logit.fit.3$coefficients %*% x)
+
+
+#Simulations to generate predicted values
+x <- c(1,25, 0, 0, 0, 0, 0,0,0,0,0,0,0)
+
+set.seed(1234)
+sim.coef <- mvrnorm(15000, logit.fit.3$coefficients, vcov(logit.fit.3))
+
+predvals.sim.0 <- invlogit(sim.coef %*% x)
+
+quantile(predvals.sim.0, seq(0,1,0.01))
+```
+
+```{r}
+#Cash Support: Running the model and getting a probability estimate 
+logit.fit.4 <- glm(y4 ~ age + female + factor(prim_act) + factor(city_size) + rel_others + rel_muslim + rel_christ + caste_others + caste_sc + caste_st + caste_bc, family=binomial(link = "logit")) 
+summary(logit.fit.4)
+
+logit.fit.4$coefficients
+
+x <- c(1,25, 0, 0, 0, 0, 0,0,0,0,0,0,0)  ## OC, Hindu, Employed, Big City, Male
+
+invlogit(logit.fit.4$coefficients %*% x)
+
+
+#Simulations to generate predicted values
+x <- c(1,25, 0, 0, 0, 0, 0,0,0,0,0,0,0)
+
+set.seed(1234)
+sim.coef <- mvrnorm(15000, logit.fit.4$coefficients, vcov(logit.fit.4))
+
+predvals.sim.0 <- invlogit(sim.coef %*% x)
+
+quantile(predvals.sim.0, seq(0,1,0.01))
+```
+```{r}
+#Business Support: Running the model and getting a probability estimate 
+logit.fit.5 <- glm(y5 ~ age + female + factor(prim_act) + factor(city_size) + rel_others + rel_muslim + rel_christ + caste_others + caste_sc + caste_st + caste_bc, family=binomial(link = "logit")) 
+summary(logit.fit.5)
+
+logit.fit.5$coefficients
+
+x <- c(1,25, 0, 0, 0, 0, 0,0,0,0,0,0,0)  ## OC, Hindu, Employed, Big City, Male
+
+invlogit(logit.fit.5$coefficients %*% x)
+
+
+#Simulations to generate predicted values
+x <- c(1,25, 0, 0, 0, 0, 0,0,0,0,0,0,0)
+
+set.seed(1234)
+sim.coef <- mvrnorm(15000, logit.fit.5$coefficients, vcov(logit.fit.5))
+
+predvals.sim.0 <- invlogit(sim.coef %*% x)
+
+quantile(predvals.sim.0, seq(0,1,0.01))
+```
+
+```{r}
+#Household Services & Infrastructure: Running the model and getting a probability estimate 
+logit.fit.6 <- glm(y6 ~ age + female + factor(prim_act) + factor(city_size) + rel_others + rel_muslim + rel_christ + caste_others + caste_sc + caste_st + caste_bc, family=binomial(link = "logit")) 
+summary(logit.fit.6)
+
+logit.fit.6$coefficients
+
+x <- c(1,25, 0, 0, 0, 0, 0,0,0,0,0,0,0)  ## OC, Hindu, Employed, Big City, Male
+
+invlogit(logit.fit.6$coefficients %*% x)
+
+
+#Simulations to generate predicted values
+x <- c(1,25, 0, 0, 0, 0, 0,0,0,0,0,0,0)
+
+set.seed(1234)
+sim.coef <- mvrnorm(15000, logit.fit.6$coefficients, vcov(logit.fit.6))
+
+predvals.sim.0 <- invlogit(sim.coef %*% x)
+
+quantile(predvals.sim.0, seq(0,1,0.01))
+```
+
