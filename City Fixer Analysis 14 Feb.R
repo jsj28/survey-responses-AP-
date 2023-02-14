@@ -4,9 +4,9 @@ library(readxl)
 library(writexl)
 
 #Main Files ####
-AP_Youth_Survey <- read_excel("youth_survey_responses (7th Feb).xlsx")
-AP_Household_Roster <- read_excel("Household Roster Youth Survey (7th Feb).xlsx")
-AP_Outmigration_Roster <- read_excel("Outmigration Roster Youth Survey (7th Feb).xlsx")
+AP_Youth_Survey <- read_excel("youth_survey_responses (14th Feb).xlsx")
+AP_Household_Roster <- read_excel("Household Roster Youth Survey (14th Feb).xlsx")
+AP_Outmigration_Roster <- read_excel("Outmigration Roster Youth Survey (14th Feb).xlsx")
 
 
 #Codebooks ####
@@ -37,7 +37,8 @@ v <- c("GVMC(VISAKHAPATNAM)", "Gvmc visakhapatnam", "GVMC (VISAKHAPATNAM)", "Gvm
        "GVMC(VISAKHAPATNAM,)", "Viskhapatnam GVMC", "Viskhapatnam (GVMC)", "Gvmc ( visakhapatnam )",
        "GVMC ( VISAKHAPATNAM)", "GVMC (Visakhapatnam )", "GVMC Visakapatnam", "GVMC VISAKAPATNAM",
        "GvMC Visakhapatnam", "Gvmc vishakapatnam", "GVMC Vishakapatnam", "Visakhaptnam", "GVMC",
-       "GVMC (Visakhapatnam", "Gvmc Visakhaption", "Visakhapatnam GVMC", "Viskhapatnam")
+       "GVMC (Visakhapatnam", "Gvmc Visakhaption", "Visakhapatnam GVMC", "Viskhapatnam", "GVMC  Visakhapatnam",
+       "GVMC ( Visakhapatnam )", "GVMC (VISAKHAPATNAM)\n", "GVMC(VISAKHAPATNAM )", "Gvms visakhapatnam", "Gvmc")
 
 AP_Youth_Survey$`City Name` <- ifelse(AP_Youth_Survey$`City Name` %in% v,
                                       "Visakhapatnam", AP_Youth_Survey$`City Name`)
@@ -114,12 +115,16 @@ AP_Youth_Survey$`City Name` <- ifelse(AP_Youth_Survey$`City Name` == "KADAPA" | 
                                       AP_Youth_Survey$`City Name` ==  "Kadappa",
                                       "Kadapa", AP_Youth_Survey$`City Name`)
 
+
+AP_Youth_Survey$`City Name` <- ifelse(AP_Youth_Survey$`City Name` == "Nidadavole",
+                                      "Nidadavolu", AP_Youth_Survey$`City Name`)
+
 v <- c("PEDDHAPURAM", "PEDDAPURAM", "Pedhapuram")
 
 AP_Youth_Survey$`City Name` <- ifelse(AP_Youth_Survey$`City Name` %in% v,
                                       "Peddapuram", AP_Youth_Survey$`City Name`)
 
-write_xlsx(AP_Youth_Survey, "youth_survey_responses (7th Feb).xlsx")
+write_xlsx(AP_Youth_Survey, "youth_survey_responses (14th Feb).xlsx")
 
 City_Wise_Numbers <- as.data.frame(table(AP_Youth_Survey$`City Name`))
 
@@ -153,7 +158,7 @@ write_xlsx(AP_Household_NonSelf, "AP_Household_NonSelf_Responses.xlsx")
 AP_Youth_Survey_Merged <- merge(AP_Youth_Survey, AP_Household_Roster[AP_Household_Roster$H_1 == "Self",], by.x = c("_uuid"), by.y = c("_submission__uuid"))
 attr(AP_Youth_Survey_Merged, "variable.labels") <- c(AP_Youth_Survey_Codebook$Column_Name, AP_Household_Roster_Codebook$Column_Name[AP_Household_Roster_Codebook$Column_Name != "_submission__uuid"])
 
-write_xlsx(AP_Youth_Survey_Merged, "AP_YouthSurvey_Roster_Merged (Feb 7th).xlsx")
+write_xlsx(AP_Youth_Survey_Merged, "AP_YouthSurvey_Roster_Merged (Feb 14th).xlsx")
 
 
 #Tables to be created - A (Skilling Response Levels) ####

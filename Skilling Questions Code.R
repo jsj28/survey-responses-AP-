@@ -76,6 +76,7 @@ AP_Youth_Survey$SciEng_F87 <- grepl(c("Engineering"), AP_Youth_Survey$YR_F_87, i
 AP_Youth_Survey$Repair_F87 <- grepl(c("Technical"), AP_Youth_Survey$YR_F_87, ignore.case = T) | grepl(c("Repair"), AP_Youth_Survey$YR_F_87, ignore.case = T)
 AP_Youth_Survey$Craft_F87 <- grepl(c("Craftwork"), AP_Youth_Survey$YR_F_87, ignore.case = T)
 
+
 #Interest
 AP_Youth_Survey$IT_F92 <- grepl(c("Information Technology"), AP_Youth_Survey$YR_F_92, ignore.case = T) | grepl(c("Computer"), AP_Youth_Survey$YR_F_92, ignore.case = T)
 AP_Youth_Survey$English_F92 <- grepl(c("English"), AP_Youth_Survey$YR_F_92, ignore.case = T) | grepl(c("Communication"), AP_Youth_Survey$YR_F_92, ignore.case = T)
@@ -84,6 +85,9 @@ AP_Youth_Survey$SciEng_F92 <- grepl(c("Engineering"), AP_Youth_Survey$YR_F_92, i
 AP_Youth_Survey$Repair_F92 <- grepl(c("Technical"), AP_Youth_Survey$YR_F_92, ignore.case = T) | grepl(c("Repair"), AP_Youth_Survey$YR_F_92, ignore.case = T)
 AP_Youth_Survey$Craft_F92 <- grepl(c("Craftwork"), AP_Youth_Survey$YR_F_92, ignore.case = T)
 
+
+AP_Youth_Survey$Total_Enr_F87 <- rowSums(AP_Youth_Survey[,c(217:222)])
+AP_Youth_Survey$Total_Int_F92 <- rowSums(AP_Youth_Survey[,c(223:228)])
 
 
 #Enrollment
@@ -145,3 +149,8 @@ cbl %>%
   kbl(caption = "Distribution of Interest in Skilling Courses", align = "l")%>%
   kable_classic(full_width = F, html_font = "Cambria", font_size = 11) %>%
   row_spec(4, bold = T)
+
+
+
+#
+
