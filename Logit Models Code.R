@@ -67,6 +67,10 @@ AP_Youth_Survey_Merged$Repair_F92 <- grepl(c("Technical"), AP_Youth_Survey_Merge
 AP_Youth_Survey_Merged$Craft_F92 <- grepl(c("Craftwork"), AP_Youth_Survey_Merged$YR_F_92, ignore.case = T)
 
 
+AP_Youth_Survey_Merged$Total_Enr_F87 <- rowSums(AP_Youth_Survey_Merged[,c(255:260)])
+AP_Youth_Survey_Merged$Total_Int_F92 <- rowSums(AP_Youth_Survey_Merged[,c(261:266)])
+
+rm(Large, Medium, Small)
 
 #Optional - Can Drop Small City Size Class
 #AP_Youth_Survey_Merged <- AP_Youth_Survey_Merged[AP_Youth_Survey_Merged$City_Size_Class != "Small", ]
@@ -132,7 +136,7 @@ sim.coef <- mvrnorm(15000, logit.fit$coefficients, vcov(logit.fit))
 
 predval.sim <- invlogit(sim.coef %*% x)
 
-quantile(predvals.sim.0, seq(0,1,0.01))
+quantile(predval.sim, seq(0,1,0.01))
 
 #Determine 95% confidence intervals
 
@@ -221,7 +225,7 @@ Conf_Int_Probs2 = cbind.data.frame(Variable = var_names, Lower_Bound = bounds[,1
 
 Conf_Int_Probs2[,c(2:4)] <-  round(Conf_Int_Probs2[,c(2:4)], 2)
 
-rm(predval.sim, bounds,sim.coef,i)
+rm(predval.sim, bounds,sim.coef,i, mean_prob, var_names)
 
 
 
@@ -257,4 +261,69 @@ colnames(Labour_Skill_Int) <- c("Labour Preference","IT", "English", "Competitiv
 
 
 rm(l1,l2,l3,l4,l5,l6)
+
+View(Labour_Skill)
+View(Labour_Skill_Int)
+
+
+#Output 4 - Distribution of No. of Skilling Requirements ####
+par(mfrow = c(1,2))
+a <- prop.table(table(AP_Youth_Survey_Merged$Total_Enr_F87[AP_Youth_Survey_Merged$Total_Enr_F87 > 0]))
+bp <-barplot(100*a, ylim = c(0,85), xlab = "No. of Courses Enrolled In", ylab = "Percentage of Total People Enrolled", main = "Enrollment Frequency in Skilling Courses",
+        col = "dodgerblue3", border = NA)
+text(bp, 100*a, round(100*a), pos = 3, col = "black")
+
+a <- prop.table(table(AP_Youth_Survey_Merged$Total_Int_F92[AP_Youth_Survey_Merged$Total_Int_F92 > 0]))
+bp <-barplot(100*a, ylim = c(0,85), xlab = "No. of Courses Interested In", ylab = "Percentage of Total People Interested", main = "Interest Frequency in Skilling Courses",
+             col = "dodgerblue3", border = NA)
+text(bp, 100*a, c(round(100*a[1:4]),1), pos = 3, col = "black")
+
+
+AP_Youth_Survey_Merged$Which_Enr_F87 <- apply(AP_Youth_Survey_Merged[,c(255:260)], 1, function(x) paste(names(AP_Youth_Survey_Merged[,c(255:260)])[x > 0], collapse = "-"))
+x <- as.data.frame(table(AP_Youth_Survey_Merged$Which_Enr_F87, AP_Youth_Survey_Merged$Total_Enr_F87)); x <- x[x$Freq >0 & x$Var2 != 0,]
+
+#x <- table(AP_Youth_Survey_Merged$Which_Enr_F87, AP_Youth_Survey_Merged$Total_Enr_F87)
+
+a <- order(-x$Freq[x$Var2 == 1])
+
+par(mfrow = c(1,2))
+
+bp <- barplot(100*x$Freq[x$Var2 == 1][a]/sum(x$Freq[x$Var2 == 1][a]), names.arg = c("IT", "Craft", "Comp. Exam", "English", "Repair", "Engineering") , ylim = c(0,80), cex.names = 0.75,
+        col = "dodgerblue3", border = NA, main = c("Distribution of Enrollment:", "Individuals with Single Course"), las = 1, ylab = "Percentage (Within Individuals with Single Course)", xlab = "Course Category")
+text(bp, 100*x$Freq[x$Var2 == 1][a]/sum(x$Freq[x$Var2 == 1][a]), round(100*x$Freq[x$Var2 == 1][a]/sum(x$Freq[x$Var2 == 1][a])), pos = 3, col = "black")
+
+
+#Manual entry
+#Single Skill - IT, English, Comp Exam, 
+#IT and Others, IT and English, Non IT Combinations
+multi_vec <- c(85,27,9)
+bp <- barplot(100*multi_vec/sum(multi_vec), names.arg = c("IT and English", "IT and Others", "Non IT"), cex.names = 0.75, ylim  = c(0,80),
+        col = "coral3", border = NA, main = c("Distribution of Enrollment:", "Individuals with Multiple Courses"), las = 1, ylab = "Percentage (Within Individuals with Multiple Courses)", xlab = "Course Categories")
+
+text(bp, 100*multi_vec/sum(multi_vec), round(100*multi_vec/sum(multi_vec)), pos = 3, col = "black")
+
+
+
+#Interest in Enrolment
+par(mfrow = c(1,2))
+AP_Youth_Survey_Merged$Which_Int_F92 <- apply(AP_Youth_Survey_Merged[,c(261:266)], 1, function(x) paste(names(AP_Youth_Survey_Merged[,c(261:266)])[x > 0], collapse = "-"))
+x <- as.data.frame(table(AP_Youth_Survey_Merged$Which_Int_F92, AP_Youth_Survey_Merged$Total_Int_F92)); x <- x[x$Freq >0 & x$Var2 != 0,]
+
+a <- order(-x$Freq[x$Var2 == 1])
+x$Var1[x$Var2 == 1][a]
+
+bp <- barplot(100*x$Freq[x$Var2 == 1][a]/sum(x$Freq[x$Var2 == 1][a]), names.arg = c("IT", "Comp. Exam", "Craft","English", "Repair", "Engineering") , ylim = c(0,80), cex.names = 0.75,
+              col = "dodgerblue3", border = NA, main = c("Distribution of Skilling Interest:", "Single Course"), las = 1, ylab = "Percentage (Within Those Interested in Single Course)", xlab = "Course Category")
+text(bp, 100*x$Freq[x$Var2 == 1][a]/sum(x$Freq[x$Var2 == 1][a]), round(100*x$Freq[x$Var2 == 1][a]/sum(x$Freq[x$Var2 == 1][a])), pos = 3, col = "black")
+
+
+#Manual entry
+#Single Skill - IT, English, Comp Exam, 
+#IT and Others, IT and English, Non IT Combinations
+multi_vec <- c(137,76,20)
+bp <- barplot(100*multi_vec/sum(multi_vec), names.arg = c("IT and English", "IT and Others", "Non IT"), cex.names = 0.75, ylim  = c(0,80),
+              col = "coral3", border = NA, main = c("Distribution of Skilling Interest:", "Multiple Courses"), las = 1, ylab = "Percentage (Within Those Interested in Multiple Courses)", xlab = "Course Categories")
+
+text(bp, 100*multi_vec/sum(multi_vec), round(100*multi_vec/sum(multi_vec)), pos = 3, col = "black")
+
 
