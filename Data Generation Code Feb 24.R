@@ -4,9 +4,9 @@ library(writexl)
 
 #Main Survey Data Generation ####
 ys_responses_1 <- read_excel("/Users/vaibhav/Documents/CPR\ -\ Work/AP\ Project/Youth_Survey_Andhra_Pradesh_Translated_30thNov_-_all_versions_-_English_en_-_2023-02-01-15-25-49.xlsx")
-ys_responses_2 <- read_excel("/Users/vaibhav/Documents/CPR\ -\ Work/AP\ Project/Youth_Survey_ANU_20thDec_Translated_-_all_versions_-_English_en_-_2023-02-14-13-38-20.xlsx")
+ys_responses_2 <- read_excel("/Users/vaibhav/Documents/CPR\ -\ Work/AP\ Project/Youth_Survey_ANU_20thDec_Translated_-_all_versions_-_English_en_-_2023-02-24-12-28-21.xlsx")
 
-ys_responses_3 <- read_excel("/Users/vaibhav/Documents/CPR\ -\ Work/AP\ Project/Youth_Survey_AU_21stDec_Translated_-_all_versions_-_English_en_-_2023-02-14-13-40-04.xlsx")
+ys_responses_3 <- read_excel("/Users/vaibhav/Documents/CPR\ -\ Work/AP\ Project/Youth_Survey_AU_21stDec_Translated_-_all_versions_-_English_en_-_2023-02-24-12-29-23.xlsx")
 
 ys1 <- colnames(ys_responses_1)
 ys2 <- colnames(ys_responses_2)
@@ -21,7 +21,7 @@ youth_survey_responses <- rbind(ys_responses_1, ys_responses_2, ys_responses_3)
 ys4 <- colnames(youth_survey_responses)
 
 #Add Clone file Responses
-ys_responses_5 <- read_excel("/Users/vaibhav/Documents/CPR\ -\ Work/AP\ Project/Clone_of_Youth_Survey_ANU_20thDec_Translated_-_all_versions_-_English_en_-_2023-02-14-13-43-13.xlsx")
+ys_responses_5 <- read_excel("/Users/vaibhav/Documents/CPR\ -\ Work/AP\ Project/Clone_of_Youth_Survey_ANU_20thDec_Translated_-_all_versions_-_English_en_-_2023-02-24-12-32-48.xlsx")
 
 ys5 <- colnames(ys_responses_5)
 
@@ -30,7 +30,7 @@ match(ys5,ys4) %in% c(1:213)
 youth_survey_responses <- rbind(youth_survey_responses, ys_responses_5)
 
 
-ys_responses_6 <- read_excel("/Users/vaibhav/Documents/CPR\ -\ Work/AP\ Project/Youth_Survey_Social_Audit_test_-_all_versions_-_English_en_-_2023-02-14-13-41-50.xlsx")
+ys_responses_6 <- read_excel("/Users/vaibhav/Documents/CPR\ -\ Work/AP\ Project/Youth_Survey_Social_Audit_test_-_all_versions_-_English_en_-_2023-02-24-12-30-08.xlsx")
 
 ys6 <- colnames(ys_responses_6)
 
@@ -46,7 +46,7 @@ a <- as.data.frame(cbind(ys6,ys4, ys6 == ys4))
 
 youth_survey_responses <- rbind(youth_survey_responses, ys_responses_6)
   
-write_xlsx(youth_survey_responses, "youth_survey_responses (14th Feb).xlsx")
+write_xlsx(youth_survey_responses, "youth_survey_responses (24th Feb).xlsx")
 
 
 
@@ -54,9 +54,9 @@ write_xlsx(youth_survey_responses, "youth_survey_responses (14th Feb).xlsx")
 
 #Household Roster
 ys_responses_1 <- read_excel("/Users/vaibhav/Documents/CPR\ -\ Work/AP\ Project/Youth_Survey_Andhra_Pradesh_Translated_30thNov_-_all_versions_-_English_en_-_2023-02-01-15-25-49.xlsx", sheet = 2)
-ys_responses_2 <- read_excel("/Users/vaibhav/Documents/CPR\ -\ Work/AP\ Project/Youth_Survey_ANU_20thDec_Translated_-_all_versions_-_English_en_-_2023-02-14-13-38-20.xlsx", sheet = 2)
+ys_responses_2 <- read_excel("/Users/vaibhav/Documents/CPR\ -\ Work/AP\ Project/Youth_Survey_ANU_20thDec_Translated_-_all_versions_-_English_en_-_2023-02-24-12-28-21.xlsx", sheet = 2)
 
-ys_responses_3 <- read_excel("/Users/vaibhav/Documents/CPR\ -\ Work/AP\ Project/Youth_Survey_AU_21stDec_Translated_-_all_versions_-_English_en_-_2023-02-14-13-40-04.xlsx", sheet = 2)
+ys_responses_3 <- read_excel("/Users/vaibhav/Documents/CPR\ -\ Work/AP\ Project/Youth_Survey_AU_21stDec_Translated_-_all_versions_-_English_en_-_2023-02-24-12-29-23.xlsx", sheet = 2)
 
 ys_responses_1$`_submission___version__` = NA; ys_responses_1 <- ys_responses_1[,c(1:37,39,38)]
 
@@ -75,7 +75,7 @@ ys4 <- colnames(Household_Roster)
 
 
 #Clone File Rosters
-ys_responses_5 <- read_excel("/Users/vaibhav/Documents/CPR\ -\ Work/AP\ Project/Clone_of_Youth_Survey_ANU_20thDec_Translated_-_all_versions_-_English_en_-_2023-02-14-13-43-13.xlsx", sheet = 2)
+ys_responses_5 <- read_excel("/Users/vaibhav/Documents/CPR\ -\ Work/AP\ Project/Clone_of_Youth_Survey_ANU_20thDec_Translated_-_all_versions_-_English_en_-_2023-02-24-12-32-48.xlsx", sheet = 2)
 
 ys5 <- colnames(ys_responses_5)
 
@@ -84,7 +84,7 @@ match(ys5,ys4) %in% c(1:38)
 Household_Roster <- rbind(Household_Roster, ys_responses_5)
 
 
-ys_responses_6 <- read_excel("/Users/vaibhav/Documents/CPR\ -\ Work/AP\ Project/Youth_Survey_Social_Audit_test_-_all_versions_-_English_en_-_2023-02-14-13-41-50.xlsx", sheet = 2)
+ys_responses_6 <- read_excel("/Users/vaibhav/Documents/CPR\ -\ Work/AP\ Project/Youth_Survey_Social_Audit_test_-_all_versions_-_English_en_-_2023-02-24-12-30-08.xlsx", sheet = 2)
 
 ys6 <- colnames(ys_responses_6)
 
@@ -95,15 +95,15 @@ a <- as.data.frame(cbind(ys6,ys4, ys6 == ys4))
 Household_Roster <- rbind(Household_Roster, ys_responses_6)
 
 
-write_xlsx(Household_Roster, "Household Roster Youth Survey (14th Feb).xlsx")
+write_xlsx(Household_Roster, "Household Roster Youth Survey (24th Feb).xlsx")
 
 
 
 #Outmigration Roster ####
 ys_responses_1 <- read_excel("/Users/vaibhav/Documents/CPR\ -\ Work/AP\ Project/Youth_Survey_Andhra_Pradesh_Translated_30thNov_-_all_versions_-_English_en_-_2023-02-01-15-25-49.xlsx", sheet = 3)
-ys_responses_2 <- read_excel("/Users/vaibhav/Documents/CPR\ -\ Work/AP\ Project/Youth_Survey_ANU_20thDec_Translated_-_all_versions_-_English_en_-_2023-02-14-13-38-20.xlsx", sheet = 3)
+ys_responses_2 <- read_excel("/Users/vaibhav/Documents/CPR\ -\ Work/AP\ Project/Youth_Survey_ANU_20thDec_Translated_-_all_versions_-_English_en_-_2023-02-24-12-28-21.xlsx", sheet = 3)
 
-ys_responses_3 <- read_excel("/Users/vaibhav/Documents/CPR\ -\ Work/AP\ Project/Youth_Survey_AU_21stDec_Translated_-_all_versions_-_English_en_-_2023-02-14-13-40-04.xlsx", sheet = 3)
+ys_responses_3 <- read_excel("/Users/vaibhav/Documents/CPR\ -\ Work/AP\ Project/Youth_Survey_AU_21stDec_Translated_-_all_versions_-_English_en_-_2023-02-24-12-29-23.xlsx", sheet = 3)
 
 ys_responses_1$`_submission___version__` = NA; ys_responses_1 <- ys_responses_1[,c(1:17,19,18)]
 
@@ -119,7 +119,7 @@ ys4 <- colnames(Outmigration_Roster)
 
 
 #Clone File Rosters
-ys_responses_5 <- read_excel("/Users/vaibhav/Documents/CPR\ -\ Work/AP\ Project/Clone_of_Youth_Survey_ANU_20thDec_Translated_-_all_versions_-_English_en_-_2023-02-14-13-43-13.xlsx", sheet = 3)
+ys_responses_5 <- read_excel("/Users/vaibhav/Documents/CPR\ -\ Work/AP\ Project/Clone_of_Youth_Survey_ANU_20thDec_Translated_-_all_versions_-_English_en_-_2023-02-24-12-32-48.xlsx", sheet = 3)
 
 ys5 <- colnames(ys_responses_5)
 
@@ -127,7 +127,7 @@ match(ys5,ys4) %in% c(1:38)
 
 Outmigration_Roster <- rbind(Outmigration_Roster, ys_responses_5)
 
-ys_responses_6 <- read_excel("/Users/vaibhav/Documents/CPR\ -\ Work/AP\ Project/Youth_Survey_Social_Audit_test_-_all_versions_-_English_en_-_2023-02-14-13-41-50.xlsx", sheet = 3)
+ys_responses_6 <- read_excel("/Users/vaibhav/Documents/CPR\ -\ Work/AP\ Project/Youth_Survey_Social_Audit_test_-_all_versions_-_English_en_-_2023-02-24-12-30-08.xlsx", sheet = 3)
 
 ys6 <- colnames(ys_responses_6)
 
@@ -136,4 +136,4 @@ a <- as.data.frame(cbind(ys6,ys4, ys6 == ys4))
 Outmigration_Roster <- rbind(Outmigration_Roster, ys_responses_6)
 
 
-write_xlsx(Outmigration_Roster, "Outmigration Roster Youth Survey (14th Feb).xlsx")
+write_xlsx(Outmigration_Roster, "Outmigration Roster Youth Survey (24th Feb).xlsx")
