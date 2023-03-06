@@ -10,8 +10,8 @@ library(kableExtra)
 invlogit <- function(x){1/(1 + exp(-x))}
 
 #Main Files ####
-AP_Youth_Survey <- read_excel("youth_survey_responses (14th Feb).xlsx")
-AP_Household_Roster <- read_excel("Household Roster Youth Survey (14th Feb).xlsx")
+AP_Youth_Survey <- read_excel("youth_survey_responses (6th Mar).xlsx")
+AP_Household_Roster <- read_excel("Household Roster Youth Survey (6th Mar).xlsx")
 
 #Codebooks ####
 AP_Youth_Survey_Codebook <- read_excel("AP_Youth_Survey_Codebook.xlsx")
@@ -39,10 +39,12 @@ AP_Youth_Survey_Merged$YR_F_94 <- ifelse(AP_Youth_Survey_Merged$Y_F_81 == "Stude
                                          ifelse(AP_Youth_Survey_Merged$Y_F_81 == "Employed", AP_Youth_Survey_Merged$Y_F_130, AP_Youth_Survey_Merged$Y_F_167))
 
 
-Small <- c("Kadiri", "Peddapuram", "Rayadurga", "Nidadavolu", "Kavali") #Less than 1 Lakh
+Small <- c("Kadiri", "Peddapuram", "Rayadurga", "Nidadavolu", "Kavali","Kondapalli") #Less than 1 Lakh
 Medium <- c("Adoni", "Eluru", "Hindupur", "Kadapa", "Kakinada", "Narasaraopet", "Rajahmundry",
             "Tadipatri", "Tenali", "Tirupati")#1-4 Lakhs
 Large <- c("Guntur", "Visakhapatnam", "Kurnool", "Nellore", "Vijayawada") #More than 4 Lakhs
+
+
 
 
 
