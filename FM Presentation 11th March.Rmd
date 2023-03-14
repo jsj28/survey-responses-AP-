@@ -1,0 +1,803 @@
+---
+title: "FM Presentation 11th March"
+author: "Centre for Policy Research"
+date: "2023-03-10"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+library(data.table)
+library(readxl)
+library(writexl)
+library(dplyr)
+library(MASS)
+library(kableExtra)
+library(foreign)
+library(tidyverse)
+
+AP_Household_Roster <- read_excel("Household Roster Youth Survey (7th Mar).xlsx")
+
+AP_Household_Roster_Codebook <- read_excel("AP_Youth_Survey_Codebook.xlsx", sheet = 2)
+colnames(AP_Household_Roster) <- c(AP_Household_Roster_Codebook$Variable_Name,"NAN")
+attr(AP_Household_Roster, "variable.labels") <- AP_Household_Roster_Codebook$Column_Name
+
+
+AP_Youth_Survey <- read_excel("youth_survey_responses (7th Mar).xlsx")
+AP_Youth_Survey_Codebook <- read_excel("AP_Youth_Survey_Codebook.xlsx")
+colnames(AP_Youth_Survey) <- c(AP_Youth_Survey_Codebook$Variable_Name, "NAN")
+attr(AP_Youth_Survey, "variable.labels") <- AP_Youth_Survey_Codebook$Column_Name
+
+##Plot theme
+newtheme <- theme_bw() +
+  theme(panel.border = element_rect(color = "darkgrey", size = 2), 
+        panel.grid.major = element_blank(), legend.position = "bottom")
+
+invlogit <- function(x){1/(1 + exp(-x))}
+
+```
+
+# Citywise Numbers
+
+
+```{r, echo = F}
+#Citywise Numbers
+AP_Youth_Survey <- AP_Youth_Survey[AP_Youth_Survey$`City Name` != "N",]
+
+City_Wise_Numbers <- as.data.frame(table(AP_Youth_Survey$`City Name`)); colnames(City_Wise_Numbers) <- c("City Name", "Responses")
+City_Wise_Numbers
+
+Small <- c("Kadiri", "Peddapuram", "Rayadurga", "Nidadavolu", "Kavali","Kondapalli") #Less than 1 Lakh
+Medium <- c("Adoni", "Eluru", "Hindupur", "Kadapa", "Kakinada", "Narasaraopet", "Rajahmundry",
+            "Tadipatri", "Tenali", "Tirupati") #1-4 Lakhs
+Large <- c("Guntur", "Visakhapatnam", "Kurnool", "Nellore", "Vijayawada") #More than 4 Lakhs
+
+
+
+AP_Youth_Survey$City_Size_Class <- ifelse(AP_Youth_Survey$`City Name`%in% Small, "Small",
+                                          ifelse(AP_Youth_Survey$`City Name` %in% Medium, "Medium",
+                                                 ifelse(AP_Youth_Survey$`City Name` %in% Large, "Large",
+                                                        "NAN")))
+
+Coastal_North <- c("Kakinada", "Peddapuram", "Rajahmundry", "Eluru", "Visakhapatnam", "Nidadavolu")
+Coastal_South <- c("Guntur", "Narasaraopet", "Tenali", "Kavali", "Nellore", "Vijayawada", "Kondapalli")
+Inland_South <- c("Hindupur", "Kadiri", "Rayadurga", "Tirupati","Adoni", "Kurnool", "Tadipatri", "Kadapa")
+
+
+AP_Youth_Survey$City_Geo_Class <- ifelse(AP_Youth_Survey$`City Name`%in% Coastal_North, "Coastal_North",
+                                          ifelse(AP_Youth_Survey$`City Name` %in% Coastal_South, "Coastal_South",
+                                                 ifelse(AP_Youth_Survey$`City Name` %in% Inland_South, "Inland_South",
+                                                        "NAN")))
+
+
+```
+
+# Crosstabs Replication
+
+```{r}
+#Satisfaction
+#Past 5 years, AP doing better or worse?
+
+as.data.frame(round(100*prop.table(table(AP_Youth_Survey$Y_G_187)),1))[c(2,5,4,1,3),]
+
+#Do you wish to move out of your town/city
+as.data.frame(round(100*prop.table(table(AP_Youth_Survey$Y_F_173)),1))[c(3,1,2),]
+
+#What about out of Andhra, for those who want to move out
+as.data.frame(round(100*prop.table(table(AP_Youth_Survey$Y_F_176)),1))[c(3,1,2),]
+
+
+#Satisfaction vs Movement
+a <- as.data.frame((round(100*prop.table(table(AP_Youth_Survey$Y_G_187, AP_Youth_Survey$Y_F_173), 1),1))[c(2,5,4,1,3),c(3)]); colnames(a) <- c("Wanting To Leave (%)")
+a
+
+#Preference for cash schemes, more or less
+as.data.frame(round(100*prop.table(table(AP_Youth_Survey$Y_G_188)),1))[c(2,5,4,1,3),]
+
+
+#Attribution for cash schemes
+as.data.frame(round(100*prop.table(table(AP_Youth_Survey$Y_E_80)),1))[c(1,4,5,6,3,7,2),]
+
+
+#Satisfaction vs Cash Schemes
+round(100*prop.table(table(AP_Youth_Survey$Y_G_187, AP_Youth_Survey$Y_G_188), 1),1)[c(2,5,4,1,3),c(2,5,4,1,3)]
+
+
+#Satisfaction vs Attribution
+round(100*prop.table(table(AP_Youth_Survey$Y_G_187, AP_Youth_Survey$Y_E_80), 1),1)[c(2,5,4,1,3),c(1,4,5,6,3,7,2)]
+```
+
+Labour Preference vs Skilling Enrollment
+
+```{r, echo = F}
+#Combining Skill Question Columns#### 
+#In main survey
+AP_Youth_Survey$YR_F_87 <- ifelse(AP_Youth_Survey$Y_F_81 == "Student", AP_Youth_Survey$Y_F_87,
+                                  ifelse(AP_Youth_Survey$Y_F_81 == "Employed", AP_Youth_Survey$Y_F_123, AP_Youth_Survey$Y_F_160))
+
+AP_Youth_Survey$YR_F_92 <- ifelse(AP_Youth_Survey$Y_F_81 == "Student", AP_Youth_Survey$Y_F_92,
+                                  ifelse(AP_Youth_Survey$Y_F_81 == "Employed", AP_Youth_Survey$Y_F_128, AP_Youth_Survey$Y_F_165))
+
+AP_Youth_Survey$YR_F_94 <- ifelse(AP_Youth_Survey$Y_F_81 == "Student", AP_Youth_Survey$Y_F_94,
+                                  ifelse(AP_Youth_Survey$Y_F_81 == "Employed", AP_Youth_Survey$Y_F_130, AP_Youth_Survey$Y_F_167))
+
+
+#Creating Variables
+AP_Youth_Survey$IT_F87 <- grepl(c("Information Technology"), AP_Youth_Survey$YR_F_87, ignore.case = T) | grepl(c("Computer"), AP_Youth_Survey$YR_F_87, ignore.case = T)
+AP_Youth_Survey$English_F87 <- grepl(c("English"), AP_Youth_Survey$YR_F_87, ignore.case = T) | grepl(c("Communication"), AP_Youth_Survey$YR_F_87, ignore.case = T)
+AP_Youth_Survey$CompExam_F87 <- grepl(c("Competitive Exam"), AP_Youth_Survey$YR_F_87, ignore.case = T)
+AP_Youth_Survey$SciEng_F87 <- grepl(c("Engineering"), AP_Youth_Survey$YR_F_87, ignore.case = T) | grepl(c("Science"), AP_Youth_Survey$YR_F_87, ignore.case = T)
+AP_Youth_Survey$Repair_F87 <- grepl(c("Technical"), AP_Youth_Survey$YR_F_87, ignore.case = T) | grepl(c("Repair"), AP_Youth_Survey$YR_F_87, ignore.case = T)
+AP_Youth_Survey$Craft_F87 <- grepl(c("Craftwork"), AP_Youth_Survey$YR_F_87, ignore.case = T)
+
+
+#Interest
+AP_Youth_Survey$IT_F92 <- grepl(c("Information Technology"), AP_Youth_Survey$YR_F_92, ignore.case = T) | grepl(c("Computer"), AP_Youth_Survey$YR_F_92, ignore.case = T)
+AP_Youth_Survey$English_F92 <- grepl(c("English"), AP_Youth_Survey$YR_F_92, ignore.case = T) | grepl(c("Communication"), AP_Youth_Survey$YR_F_92, ignore.case = T)
+AP_Youth_Survey$CompExam_F92 <- grepl(c("Competitive Exam"), AP_Youth_Survey$YR_F_92, ignore.case = T)
+AP_Youth_Survey$SciEng_F92 <- grepl(c("Engineering"), AP_Youth_Survey$YR_F_92, ignore.case = T) | grepl(c("Science"), AP_Youth_Survey$YR_F_92, ignore.case = T)
+AP_Youth_Survey$Repair_F92 <- grepl(c("Technical"), AP_Youth_Survey$YR_F_92, ignore.case = T) | grepl(c("Repair"), AP_Youth_Survey$YR_F_92, ignore.case = T)
+AP_Youth_Survey$Craft_F92 <- grepl(c("Craftwork"), AP_Youth_Survey$YR_F_92, ignore.case = T)
+
+
+AP_Youth_Survey$Total_Enr_F87 <- rowSums(AP_Youth_Survey[,c(217:222)+3])
+AP_Youth_Survey$Total_Int_F92 <- rowSums(AP_Youth_Survey[,c(223:228)+3])
+
+
+l1 <- as.data.frame(round(100*prop.table(table(AP_Youth_Survey$Y_F_170, AP_Youth_Survey$IT_F87), 1),1))
+l2 <- as.data.frame(round(100*prop.table(table(AP_Youth_Survey$Y_F_170, AP_Youth_Survey$English_F87), 2),1))
+l3 <- as.data.frame(round(100*prop.table(table(AP_Youth_Survey$Y_F_170, AP_Youth_Survey$CompExam_F87), 2),1))
+l4 <- as.data.frame(round(100*prop.table(table(AP_Youth_Survey$Y_F_170, AP_Youth_Survey$SciEng_F87), 2),1))
+l5 <- as.data.frame(round(100*prop.table(table(AP_Youth_Survey$Y_F_170, AP_Youth_Survey$Repair_F87), 2),1))
+l6 <- as.data.frame(round(100*prop.table(table(AP_Youth_Survey$Y_F_170, AP_Youth_Survey$Craft_F87), 2),1))
+
+
+l1 <- l1[l1$Var2 == T,]; l2 <- l2[l2$Var2 == T,]; l3 <- l3[l3$Var2 == T,]; l4 <- l4[l4$Var2 == T,]; l5 <- l5[l5$Var2 == T,]; l6 <- l6[l6$Var2 == T,]
+
+Labour_Skill <- cbind.data.frame(Labour_Pref = l1$Var1, l1$Freq, l2$Freq, l3$Freq, l4$Freq, l5$Freq, l6$Freq )
+colnames(Labour_Skill) <- c("Labour Preference","IT", "English", "Competitive Exam", "Engineering/Science", "Technical/Repair", "Craftwork")
+
+rm(l1,l2,l3,l4,l5,l6)
+Labour_Skill
+```
+
+Skilling Enrollment vs Interest
+
+```{r, echo = F}
+#Skilling Enrollment vs Interest
+c <- round(100*prop.table(table(AP_Youth_Survey$YR_F_87 != "No", AP_Youth_Survey$YR_F_92 != "No")),1)
+rownames(c) <- c("Not Enrolled", "Enrolled"); colnames(c) <- c("No Intention", "Intention")
+c
+```
+
+
+Enrollment/Intent vs Preference to Leave
+
+```{r, echo = F}
+#Row 1 - No Enrollment or Intent <- YR_F_87 == No & YR_F_92 == "No
+
+d <- table(AP_Youth_Survey$YR_F_87 == "No" & AP_Youth_Survey$YR_F_92 == "No", AP_Youth_Survey$Y_F_173)
+rownames(d) <- c("Enrolled/Intend to Enroll", "No Enrollment or Intent")
+d
+```
+
+
+#Additions to be Made
+Enrollment and intention 4 way table for all categories
+
+```{r, echo = F}
+#Enrollment and intention 4 way table for all categories
+AP_Youth_Survey_Merged <- merge(AP_Youth_Survey, AP_Household_Roster[AP_Household_Roster$H_1 == "Self",], by.x = c("_uuid"), by.y = c("_submission__uuid"))
+```
+
+
+```{r, echo = T}
+#Female
+d <- round(100*prop.table(table(AP_Youth_Survey_Merged$YR_F_87[AP_Youth_Survey_Merged$Gender == "Female"] != "No", AP_Youth_Survey_Merged$YR_F_92[AP_Youth_Survey_Merged$Gender == "Female"] != "No")),1)
+rownames(d) <- c("Not Enrolled", "Enrolled"); colnames(d) <- c("No Intention", "Intention")
+d
+
+#Male
+d <- round(100*prop.table(table(AP_Youth_Survey_Merged$YR_F_87[AP_Youth_Survey_Merged$Gender == "Male"] != "No", AP_Youth_Survey_Merged$YR_F_92[AP_Youth_Survey_Merged$Gender == "Male"] != "No")),1)
+rownames(d) <- c("Not Enrolled", "Enrolled"); colnames(d) <- c("No Intention", "Intention")
+d
+
+#Employed
+d <- round(100*prop.table(table(AP_Youth_Survey_Merged$YR_F_87[AP_Youth_Survey_Merged$Y_F_81 == "Employed"] != "No", AP_Youth_Survey_Merged$YR_F_92[AP_Youth_Survey_Merged$Y_F_81 == "Employed"] != "No")),1)
+rownames(d) <- c("Not Enrolled", "Enrolled"); colnames(d) <- c("No Intention", "Intention")
+d
+
+#Unemployed
+d <- round(100*prop.table(table(AP_Youth_Survey_Merged$YR_F_87[AP_Youth_Survey_Merged$Y_F_81 == "Unemployed"] != "No", AP_Youth_Survey_Merged$YR_F_92[AP_Youth_Survey_Merged$Y_F_81 == "Unemployed"] != "No")),1)
+rownames(d) <- c("Not Enrolled", "Enrolled"); colnames(d) <- c("No Intention", "Intention")
+d
+
+#Student
+d <- round(100*prop.table(table(AP_Youth_Survey_Merged$YR_F_87[AP_Youth_Survey_Merged$Y_F_81 == "Student"] != "No", AP_Youth_Survey_Merged$YR_F_92[AP_Youth_Survey_Merged$Y_F_81 == "Student"] != "No")),1)
+rownames(d) <- c("Not Enrolled", "Enrolled"); colnames(d) <- c("No Intention", "Intention")
+d
+
+
+#Female Student
+d <- round(100*prop.table(table(AP_Youth_Survey_Merged$YR_F_87[AP_Youth_Survey_Merged$Y_F_81 == "Student" & AP_Youth_Survey_Merged$Gender == "Female"] != "No", AP_Youth_Survey_Merged$YR_F_92[AP_Youth_Survey_Merged$Y_F_81 == "Student" & AP_Youth_Survey_Merged$Gender == "Female"] != "No")),1)
+rownames(d) <- c("Not Enrolled", "Enrolled"); colnames(d) <- c("No Intention", "Intention")
+d
+
+
+#Male Student
+d <- round(100*prop.table(table(AP_Youth_Survey_Merged$YR_F_87[AP_Youth_Survey_Merged$Y_F_81 == "Student" & AP_Youth_Survey_Merged$Gender == "Male"] != "No", AP_Youth_Survey_Merged$YR_F_92[AP_Youth_Survey_Merged$Y_F_81 == "Student" & AP_Youth_Survey_Merged$Gender == "Male"] != "No")),1)
+rownames(d) <- c("Not Enrolled", "Enrolled"); colnames(d) <- c("No Intention", "Intention")
+d
+
+
+```
+
+Mobility by Marital Status and Gender
+
+```{r}
+round(100*prop.table(table(AP_Youth_Survey_Merged$Y_F_176[AP_Youth_Survey_Merged$H_4 == "Currently Married"], AP_Youth_Survey_Merged$Gender[AP_Youth_Survey_Merged$H_4 == "Currently Married"]),2),1)
+    
+round(100*prop.table(table(AP_Youth_Survey_Merged$Y_F_176[AP_Youth_Survey_Merged$H_4 != "Currently Married"], AP_Youth_Survey_Merged$Gender[AP_Youth_Survey_Merged$H_4 != "Currently Married"]),2),1)
+
+
+round(100*prop.table(table(AP_Youth_Survey_Merged$Y_F_173[AP_Youth_Survey_Merged$H_4 == "Currently Married"], AP_Youth_Survey_Merged$Gender[AP_Youth_Survey_Merged$H_4 == "Currently Married"]),2),1)
+    
+round(100*prop.table(table(AP_Youth_Survey_Merged$Y_F_173[AP_Youth_Survey_Merged$H_4 != "Currently Married"], AP_Youth_Survey_Merged$Gender[AP_Youth_Survey_Merged$H_4 != "Currently Married"]),2),1)
+             
+
+
+```
+
+Satisfaction Responses Disaggregated Demographically
+
+```{r}
+#Gender
+round(100*prop.table(table(AP_Youth_Survey_Merged$Y_G_187, AP_Youth_Survey_Merged$Gender), 2),1)[c(2,5,4,1,3),]
+
+#Marital Status
+round(100*prop.table(table(AP_Youth_Survey_Merged$Y_G_187, AP_Youth_Survey_Merged$H_4 == "Currently Married"), 2),1)[c(2,5,4,1,3),]
+
+#Age 
+round(100*prop.table(table(AP_Youth_Survey_Merged$Y_G_187, AP_Youth_Survey_Merged$Age >= 25), 2),1)[c(2,5,4,1,3),]
+
+#Education
+College <- c("Diploma/Certificate Course", "Graduate: Technical", "Graduate: General", "Postgraduate and above")
+
+round(100*prop.table(table(AP_Youth_Survey_Merged$Y_G_187, (AP_Youth_Survey_Merged$H_5 %in% College) == T), 2),1)[c(2,5,4,1,3),]
+
+#City Size Class
+round(100*prop.table(table(AP_Youth_Survey_Merged$Y_G_187, AP_Youth_Survey_Merged$City_Size_Class), 2),1)[c(2,5,4,1,3),]
+
+
+#City Geo Region
+round(100*prop.table(table(AP_Youth_Survey_Merged$Y_G_187, AP_Youth_Survey_Merged$City_Geo_Class), 2),1)[c(2,5,4,1,3),]
+
+#Caste Category
+round(100*prop.table(table(AP_Youth_Survey_Merged$Y_G_187, AP_Youth_Survey_Merged$Y_A_15), 2),1)[c(2,5,4,1,3), c(1,3,5,6,4,2)]
+
+```
+
+
+Attribution Responses Disaggregated Demographically
+
+```{r}
+#Gender
+round(100*prop.table(table(AP_Youth_Survey_Merged$Y_E_80, AP_Youth_Survey_Merged$Gender), 2),1)[c(1,4,5,6,3,7,2),]
+
+#Marital Status
+round(100*prop.table(table(AP_Youth_Survey_Merged$Y_E_80, AP_Youth_Survey_Merged$H_4 == "Currently Married"), 2),1)[c(1,4,5,6,3,7,2),]
+
+#Age 
+round(100*prop.table(table(AP_Youth_Survey_Merged$Y_E_80, AP_Youth_Survey_Merged$Age >= 25), 2),1)[c(1,4,5,6,3,7,2),]
+
+#Education
+College <- c("Diploma/Certificate Course", "Graduate: Technical", "Graduate: General", "Postgraduate and above")
+
+round(100*prop.table(table(AP_Youth_Survey_Merged$Y_E_80, (AP_Youth_Survey_Merged$H_5 %in% College) == T), 2),1)[c(1,4,5,6,3,7,2),]
+
+
+#City Size Class
+round(100*prop.table(table(AP_Youth_Survey$Y_E_80, AP_Youth_Survey$City_Size_Class), 2),1)[c(1,4,5,6,3,7,2),]
+
+#City Geo Region
+round(100*prop.table(table(AP_Youth_Survey$Y_E_80, AP_Youth_Survey$City_Geo_Class), 2),1)[c(1,4,5,6,3,7,2),]
+
+
+#Caste Category
+round(100*prop.table(table(AP_Youth_Survey$Y_E_80, AP_Youth_Survey$Y_A_15), 2),1)[c(1,4,5,6,3,7,2),c(1,3,5,6,4,2)]
+
+```
+
+
+# Presentation Pertaining to Social Schemes and Citizen Support
+
+I. Support for Education
+```{r}
+A <- AP_Youth_Survey
+
+ammavodi <- A[grep("Ammavodi", A$Y_E_55), ]
+jvd <- A[grep("Jagananna Vidya Deevena", A$Y_E_55), ]
+jvvd <- A[grep("Jagananna VasathI Deevena", A$Y_E_55), ]
+jvk <- A[grep("Jagananna Vidya Kanuka", A$Y_E_55), ]
+rte <- A[grep("Right to Education", A$Y_E_55), ]
+pms <- A[grep("Pre-Matric Scholarship", A$Y_E_55), ]
+fls <- A[grep("Free Laptop Scheme", A$Y_E_55), ]
+other <- A[grep("Other", A$Y_E_55), ]
+
+beneficiaries <- c(nrow(ammavodi), nrow(jvd), nrow(jvvd), nrow(jvk), nrow(rte), nrow(pms), nrow(fls), nrow(other))
+Scheme <- c("Ammavodi", "Jagananna Vidya Deevena", "Jagananna Vasathi Deevena", "Jagananna Vidya Kanuka", "Right to Education", "Pre-Matric Scholarship", "Free Laptop Scheme", "Others")
+
+edbenefits_dta <- data.frame (Scheme, beneficiaries) %>%
+mutate (Proportions = round(beneficiaries*100/sum(beneficiaries),1))
+
+edbenefits_dta$Scheme <- as.factor(edbenefits_dta$Scheme)
+edbenefits_dta$Scheme <- factor(edbenefits_dta$Scheme, levels = c("Ammavodi", "Jagananna Vidya Deevena", "Jagananna Vasathi Deevena", "Jagananna Vidya Kanuka", "Right to Education", "Others", "Free Laptop Scheme", "Pre-Matric Scholarship"))
+
+
+edbenefits_plot <- ggplot(edbenefits_dta, aes(x= Scheme, y= Proportions, fill = Scheme)) +
+  geom_bar(stat="identity", width= 0.5, show.legend = FALSE) + 
+  geom_text (aes(label = Proportions), position = position_dodge(0.1), vjust = -1) +
+  scale_y_continuous(limits = c(0,100)) +
+  scale_x_discrete(labels = function(`Scheme`) str_wrap(`Scheme`, width = 10)) +
+  scale_fill_brewer(palette="YlGnBu") +
+  labs(x="",y="Percentage", subtitle = "Support for Education") + newtheme
+
+edbenefits_plot
+```
+
+II. Support for Health
+```{r}
+arogyasri <- A[grep("Arogyasri", A$Y_E_60), ]
+pmjay <- A[grep("Pradhan Mantri Jan Aarogya Yojana", A$Y_E_60), ]
+fh <- A[grep("Free Hospitalization", A$Y_E_60), ]
+jsy <- A[grep("Janani Suraksha Yojana", A$Y_E_60), ]
+pmmvy <- A[grep("Pradhan Mantri Matru Vandana Yojana", A$Y_E_60), ]
+other <- A[grep("Other", A$Y_E_60), ]
+
+beneficiaries <- c(nrow(arogyasri), nrow(pmjay), nrow(fh), nrow(jsy), nrow(pmmvy), nrow(other))
+Scheme <- c("Arogyasri", "Pradhan Mantri Jan Aarogya Yojana (PMJAY)", "Free Hospitalization", "Janani Suraksha Yojana", "Pradhan Mantri Matru Vandana Yojana (PMMVY)", "Others")
+
+healthbenefits_dta <- data.frame (Scheme, beneficiaries) %>%
+mutate (Proportions = round(beneficiaries*100/sum(beneficiaries),1))
+
+healthbenefits_dta$Scheme <- factor(healthbenefits_dta$Scheme, levels = c("Arogyasri", "Free Hospitalization", "Pradhan Mantri Jan Aarogya Yojana (PMJAY)", "Janani Suraksha Yojana", "Pradhan Mantri Matru Vandana Yojana (PMMVY)", "Others"))
+
+
+healthbenefits_plot <- ggplot(healthbenefits_dta, aes(x= Scheme, y= Proportions, fill = Scheme)) +
+  geom_bar(stat="identity", width= 0.5, show.legend = FALSE) + 
+  geom_text (aes(label = Proportions), position = position_dodge(0.1), vjust = -1) +
+  scale_y_continuous(limits = c(0,100)) +
+  scale_x_discrete(labels = function(`Scheme`) str_wrap(`Scheme`, width = 10)) +
+  scale_fill_brewer(palette="YlGnBu") +
+  labs(x="",y="Percentage", subtitle = "Support for Health") + newtheme
+
+healthbenefits_plot
+```
+
+III. Support for Housing
+```{r}
+illu <- A[grep("Pedalandariki Illu", A$Y_E_50), ]
+pmay <- A[grep("Pradhan Mantri Awaas Yojana", A$Y_E_50), ]
+ray <- A[grep("RAY", A$Y_E_50), ]
+other <- A[grep("Other", A$Y_E_50), ]
+
+beneficiaries <- c(nrow(illu), nrow(pmay), nrow(ray), nrow(other))
+Scheme <- c("Pedalandariki Illu", "Pradhan Mantri Awaas Yojana", "RAY (Rajeev Awas Yojana)", "Others")
+
+housingbenefits_dta <- data.frame (Scheme, beneficiaries) %>%
+mutate (Proportions = round(beneficiaries*100/sum(beneficiaries),1))
+
+housingbenefits_dta$Scheme <- factor(housingbenefits_dta$Scheme, levels = c("Pedalandariki Illu", "Pradhan Mantri Awaas Yojana", "RAY (Rajeev Awas Yojana)", "Others"))
+
+housingbenefits_plot <- ggplot(housingbenefits_dta, aes(x= Scheme, y= Proportions, fill = Scheme)) +
+  geom_bar(stat="identity", width= 0.5, show.legend = FALSE) + 
+  geom_text (aes(label = Proportions), position = position_dodge(0.1), vjust = -1) +
+  scale_y_continuous(limits = c(0,100)) +
+  scale_x_discrete(labels = function(`Scheme`) str_wrap(`Scheme`, width = 10)) +
+  scale_fill_brewer(palette="YlGnBu") +
+  labs(x="",y="Percentage", subtitle = "Support for Housing") + newtheme
+
+housingbenefits_plot
+
+```
+IV. Cash Support (DBT)
+```{r}
+pensions <- A[grep("Pension", A$Y_E_65), ]
+pmkisan <- A[grep("PM Kisan", A$Y_E_65), ]
+cheyutha <- A[grep("YSR Cheyutha", A$Y_E_65), ]
+kapuneshtam <- A[grep("YSR Kapu Neshtam", A$Y_E_65), ]
+ebcneshtam <- A[grep("YSR EBC Neshtam", A$Y_E_65), ]
+Others <- A[grep("Other", A$Y_E_65), ]
+rythubharosa <- A[grep("Rythu Bharosa", A$Y_E_65), ]
+
+beneficiaries <- c(nrow(pensions), nrow(pmkisan), nrow(cheyutha), nrow(kapuneshtam), nrow(ebcneshtam), nrow(Others), nrow(rythubharosa))
+Scheme <- c("Pension", "PM Kisan", "YSR Cheyutha", "YSR Kapu Neshtam", "YSR EBC Neshtam", "Others", "Rythu Bharosa")
+
+cashbenefits_dta <- data.frame (Scheme, beneficiaries) %>%
+mutate (Proportions = round(beneficiaries*100/sum(beneficiaries),1))
+
+cashbenefits_dta$Scheme <- factor(cashbenefits_dta$Scheme, levels = c("Pension", "YSR Cheyutha", "Rythu Bharosa", "YSR Kapu Neshtam", "PM Kisan", "YSR EBC Neshtam", "Others"))
+
+cashbenefits_plot <- ggplot(cashbenefits_dta, aes(x= Scheme, y= Proportions, fill = Scheme)) +
+  geom_bar(stat="identity", width= 0.5, show.legend = FALSE) + 
+  geom_text (aes(label = Proportions), position = position_dodge(0.1), vjust = -1) +
+  scale_y_continuous(limits = c(0,100)) +
+  scale_x_discrete(labels = function(`Scheme`) str_wrap(`Scheme`, width = 10)) +
+  scale_fill_brewer(palette="YlGnBu") +
+  labs(x="",y="Percentage", subtitle = "Cash Support") + newtheme
+
+cashbenefits_plot
+
+```
+
+V. Business Support, Loan Support & Loan Forgiveness
+```{r}
+mudra <- A[grep("MUDRA", A$Y_E_70), ]
+aasara <- A[grep("YSR Aasara", A$Y_E_70), ]
+adarsham <- A[grep("YSR Adarsham", A$Y_E_70), ]
+sunnavaddi <- A[grep("YSR Sunna Vaddi", A$Y_E_70), ]
+Others <- A[grep("Other", A$Y_E_70), ]
+
+beneficiaries <- c(nrow(mudra), nrow(aasara),nrow(adarsham), nrow(sunnavaddi), nrow(Others))
+Scheme <- c("MUDRA", "YSR Aasara", "YSR Adarsham", "YSR Sunna Vaddi", "Others")
+
+loanbenefits_dta <- data.frame (Scheme, beneficiaries) %>%
+mutate (Proportions = round(beneficiaries*100/sum(beneficiaries),1))
+
+loanbenefits_dta$Scheme <- factor(loanbenefits_dta$Scheme, levels = c("YSR Sunna Vaddi", "YSR Aasara", "Others", "MUDRA", "YSR Adarsham"))
+
+loanbenefits_plot <- ggplot(loanbenefits_dta, aes(x= Scheme, y= Proportions, fill = Scheme)) +
+  geom_bar(stat="identity", width= 0.5, show.legend = FALSE) + 
+  geom_text (aes(label = Proportions), position = position_dodge(0.1), vjust = -1) +
+  scale_y_continuous(limits = c(0,100)) +
+  scale_x_discrete(labels = function(`Scheme`) str_wrap(`Scheme`, width = 10)) +
+  scale_fill_brewer(palette="YlGnBu") +
+  labs(x="",y="Percentage", subtitle = "Business Support, Loan Support & Loan Forgiveness") + newtheme
+
+loanbenefits_plot
+
+```
+VI. Support for Household Services & Infrastructure
+
+```{r}
+sanitation <- A[grep("Sanitation", A$Y_E_75), ]
+watersupply <- A[grep("Water supply", A$Y_E_75), ]
+lpg <- A[grep("LPG", A$Y_E_75), ]
+childcare <- A[grep("To take care of children", A$Y_E_75), ]
+disability <- A[grep("disability", A$Y_E_75), ]
+pension <- A[grep("Pension", A$Y_E_75), ]
+
+beneficiaries <- c(nrow(sanitation), nrow(watersupply), nrow(lpg), nrow(childcare), nrow(disability), nrow(pension))
+Scheme <- c("Sanitation", "Water supply", "LPG", "To take care of children", "To take care of person(s) with disability", "Pensions")
+
+services_dta <- data.frame (Scheme, beneficiaries) %>%
+mutate (Proportions = round(beneficiaries*100/sum(beneficiaries),1))
+
+services_dta$Scheme <- factor(services_dta$Scheme, levels = c("Water supply", "Sanitation", "LPG", "Pensions" , "To take care of children", "To take care of person(s) with disability"))
+
+services_plot <- ggplot(services_dta, aes(x= Scheme, y= Proportions, fill = Scheme)) +
+  geom_bar(stat="identity", width= 0.5, show.legend = FALSE) + 
+  geom_text (aes(label = Proportions), position = position_dodge(0.1), vjust = -1) +
+  scale_y_continuous(limits = c(0,100)) +
+  scale_x_discrete(labels = function(`Scheme`) str_wrap(`Scheme`, width = 10)) +
+  scale_fill_brewer(palette="YlGnBu") +
+  labs(x="",y="Percentage", subtitle = "Support for Household Services & Infrastructure") + newtheme
+
+services_plot
+```
+
+VII. Attribution Questions
+```{r}
+Y_E_80 <- as.data.frame(table(AP_Youth_Survey$Y_E_80)) %>% 
+mutate (Proportions = round(Freq*100/sum(Freq),1)) %>% 
+rename ("Response" = Var1) %>% 
+rename ("Count" = Freq) 
+
+Y_E_80$Response <- as.factor(Y_E_80$Response)
+
+Y_E_80$Response <- factor(Y_E_80$Response, levels = c("Chief Minister", "Government Officials", "Don't know", "Ward Councillor", "MLA", "Prime Minister", "MP"))
+
+Y_E_80_plot <- ggplot(Y_E_80, aes(x= Response, y= Proportions, fill = Response)) +
+  geom_bar(stat="identity", width= 0.5, show.legend = FALSE) + 
+  geom_text (aes(label = Proportions), position = position_dodge(0.1), vjust = -1) +
+  scale_y_continuous(limits = c(0,80)) +
+  scale_x_discrete(labels = function(`Response`) str_wrap(`Response`, width = 10)) +
+  #scale_fill_brewer(palette="YlGnBu") +
+  labs(x="",y="Percentage", subtitle = "Attribution of Credit (by position)") + newtheme
+
+Y_E_80_plot
+```
+VIII. Visualizing respondents not covered by schemes
+```{r}
+No_housing <- A[grep("No", A$Y_E_50), ]
+No_education <- A[grep("No", A$Y_E_55), ]
+No_health <- A[grep("No", A$Y_E_60), ]
+No_cashsupport <- A[grep("No", A$Y_E_65), ]
+No_loan <- A[grep("No", A$Y_E_70), ]
+No_services <- A[grep("No", A$Y_E_75), ]
+
+no_responses <- c(nrow(No_housing), nrow(No_education), nrow(No_health), nrow(No_cashsupport), nrow(No_loan), nrow(No_services))
+Benefits <- c("Housing", "Education", "Health", "Cash Support", "Debt Support, Business Support & Loan Forgiveness", "Household Services and Infrastructure")
+
+not_recieved <- data.frame(Benefits, no_responses)
+
+
+not_recieved <- not_recieved %>% 
+mutate ("Proportions (Not Recieved)" = round(no_responses*100/sum(no_responses),1)) %>% 
+dplyr::select(-no_responses)
+
+unknown_housing <- A[grep("Don't Know", A$Y_E_50), ]
+unknown_education <- A[grep("Don't know", A$Y_E_55), ]
+unknown_health <- A[grep("Don't know", A$Y_E_60), ]
+unknown_cashsupport <- A[grep("Don't Know", A$Y_E_65), ]
+unknown_loan <- A[grep("Don't Know", A$Y_E_70), ]
+unknown_services <- A[grep("Don't Know", A$Y_E_75), ]
+
+no_responses <- c(nrow(unknown_housing), nrow(unknown_education), nrow(unknown_health), nrow(unknown_cashsupport), nrow(unknown_loan), nrow(unknown_services))
+Benefitss <- c("Housing", "Education", "Health", "Cash Support", "Debt Support, Business Support & Loan Forgiveness", "Household Services and Infrastructure")
+group <- c("Didn't know", "Didn't know", "Didn't know", "Didn't know", "Didn't know", "Didn't know")
+
+unknown <- data.frame(Benefitss, no_responses)
+
+unknown <- unknown %>% 
+mutate ("Proportions (Didn't know)" = round(no_responses*100/sum(no_responses),1)) %>% 
+dplyr::select(-no_responses)
+
+unknown_noresponse <- cbind(not_recieved, unknown) %>% 
+dplyr::select (-Benefitss)
+
+unknown_noresponse %>% 
+kbl(caption = "Support to Citizens: Not Recieved or Didn't know ", align = "l")%>%
+  kable_classic(full_width = F, html_font = "Cambria", font_size = 15)
+```
+
+```{r}
+##Organizing Outcome Variables
+
+#Support for Housing
+y1 <- ifelse(AP_Youth_Survey_Merged$Y_E_50 == "No", 0, 1)
+
+#Support for Education
+y2 <- ifelse(AP_Youth_Survey_Merged$Y_E_55 == "No", 0, 1)
+
+#Support for Health
+y3 <- ifelse(AP_Youth_Survey_Merged$Y_E_60 == "No", 0, 1)
+
+#Cash Support
+y4 <- ifelse(AP_Youth_Survey_Merged$Y_E_65 == "No", 0, 1)
+
+#Business Support & Debt Support
+y5 <- ifelse(AP_Youth_Survey_Merged$Y_E_70 == "No", 0, 1)
+
+#Household Services & Infrastructure
+y6 <- ifelse(AP_Youth_Survey_Merged$Y_E_75 == "No", 0, 1)
+
+##Organising Predictors
+age <- AP_Youth_Survey_Merged$Age
+
+male <- ifelse(AP_Youth_Survey_Merged$Gender == "Male", 1, 0)
+female <- ifelse(AP_Youth_Survey_Merged$Gender == "Female", 1, 0)
+
+rel_hindu <- ifelse(AP_Youth_Survey_Merged$Y_A_13 == "Hinduism", 1, 0)
+rel_muslim <- ifelse(AP_Youth_Survey_Merged$Y_A_13 == "Islam", 1, 0)
+rel_christ <- ifelse(AP_Youth_Survey_Merged$Y_A_13 == "Christianity", 1, 0)
+rel_others <- ifelse((AP_Youth_Survey_Merged$Y_A_13 %in% c("Christianity", "Hinduism", "Islam")) == F, 1, 0)
+
+
+caste_gen <- ifelse(AP_Youth_Survey_Merged$Y_A_15 == "General (OC)", 1, 0)
+caste_sc <- ifelse(AP_Youth_Survey_Merged$Y_A_15 == "Scheduled Caste (SC)", 1, 0)
+caste_st <- ifelse(AP_Youth_Survey_Merged$Y_A_15 == "Scheduled Tribe (ST)", 1, 0)
+caste_bc <- ifelse(AP_Youth_Survey_Merged$Y_A_15 == "Backward Caste (BC)", 1, 0)
+caste_others <- ifelse((AP_Youth_Survey_Merged$Y_A_15 %in% c("Backward Caste (BC)", "Scheduled Tribe (ST)", "Scheduled Caste (SC)", "General (OC)")) == F, 1, 0)
+
+prim_act <- AP_Youth_Survey_Merged$Y_F_81
+
+city_size <- AP_Youth_Survey_Merged$City_Size_Class
+```
+
+
+```{r}
+#Housing: Running the model and getting a probability estimate 
+logit.fit.1 <- glm(y1 ~ age + female + factor(prim_act) + factor(city_size) + rel_others + rel_muslim + rel_christ + caste_others + caste_sc + caste_st + caste_bc, family=binomial(link = "logit")) 
+summary(logit.fit.1)
+
+logit.fit.1$coefficients
+
+x <- c(1,25, 0, 0, 0, 0,0, 0,0,0,0,0,0,0)  ## OC, Hindu, Employed, Big City, Male
+
+invlogit(logit.fit.1$coefficients %*% x)
+
+
+#Simulations to generate predicted values
+x <- c(1,25, 0, 0, 0, 0,0, 0,0,0,0,0,0,0)
+
+set.seed(1234)
+sim.coef <- mvrnorm(15000, logit.fit.1$coefficients, vcov(logit.fit.1))
+
+predvals.sim.0 <- invlogit(sim.coef %*% x)
+
+quantile(predvals.sim.0, seq(0,1,0.01))
+```
+
+```{r}
+#Education: Running the model and getting a probability estimate 
+logit.fit.2 <- glm(y2 ~ age + female + factor(prim_act) + factor(city_size) + rel_others + rel_muslim + rel_christ + caste_others + caste_sc + caste_st + caste_bc, family=binomial(link = "logit")) 
+
+
+logit.fit.2$coefficients
+
+x <- c(1,25, 0, 0, 0, 0,0, 0,0,0,0,0,0,0)  ## OC, Hindu, Employed, Big City, Male
+
+invlogit(logit.fit.2$coefficients %*% x)
+
+
+#Simulations to generate predicted values
+x <- c(1,25, 0, 0, 0, 0,0, 0,0,0,0,0,0,0)
+
+set.seed(1234)
+sim.coef <- mvrnorm(15000, logit.fit.2$coefficients, vcov(logit.fit.2))
+
+predvals.sim.0 <- invlogit(sim.coef %*% x)
+
+quantile(predvals.sim.0, seq(0,1,0.01))
+```
+
+```{r}
+#Health: Running the model and getting a probability estimate 
+logit.fit.3 <- glm(y3 ~ age + female + factor(prim_act) + factor(city_size) + rel_others + rel_muslim + rel_christ + caste_others + caste_sc + caste_st + caste_bc, family=binomial(link = "logit")) 
+summary(logit.fit.3)
+
+logit.fit.3$coefficients
+
+x <- c(1,25, 0, 0, 0, 0,0, 0,0,0,0,0,0,0)  ## OC, Hindu, Employed, Big City, Male
+
+invlogit(logit.fit.3$coefficients %*% x)
+
+
+#Simulations to generate predicted values
+x <- c(1,25, 0, 0, 0, 0,0, 0,0,0,0,0,0,0)
+
+set.seed(1234)
+sim.coef <- mvrnorm(15000, logit.fit.3$coefficients, vcov(logit.fit.3))
+
+predvals.sim.0 <- invlogit(sim.coef %*% x)
+
+quantile(predvals.sim.0, seq(0,1,0.01))
+```
+
+```{r}
+#Cash Support: Running the model and getting a probability estimate 
+logit.fit.4 <- glm(y4 ~ age + female + factor(prim_act) + factor(city_size) + rel_others + rel_muslim + rel_christ + caste_others + caste_sc + caste_st + caste_bc, family=binomial(link = "logit")) 
+summary(logit.fit.4)
+
+logit.fit.4$coefficients
+
+x <- c(1,25, 0, 0, 0, 0,0, 0,0,0,0,0,0,0)  ## OC, Hindu, Employed, Big City, Male
+
+invlogit(logit.fit.4$coefficients %*% x)
+
+
+#Simulations to generate predicted values
+x <- c(1,25, 0, 0, 0, 0,0, 0,0,0,0,0,0,0)
+
+set.seed(1234)
+sim.coef <- mvrnorm(15000, logit.fit.4$coefficients, vcov(logit.fit.4))
+
+predvals.sim.0 <- invlogit(sim.coef %*% x)
+
+quantile(predvals.sim.0, seq(0,1,0.01))
+```
+
+```{r}
+#Business Support: Running the model and getting a probability estimate 
+logit.fit.5 <- glm(y5 ~ age + female + factor(prim_act) + factor(city_size) + rel_others + rel_muslim + rel_christ + caste_others + caste_sc + caste_st + caste_bc, family=binomial(link = "logit")) 
+summary(logit.fit.5)
+
+logit.fit.5$coefficients
+
+x <- c(1,25, 0, 0, 0, 0,0, 0,0,0,0,0,0,0)  ## OC, Hindu, Employed, Big City, Male
+
+invlogit(logit.fit.5$coefficients %*% x)
+
+
+#Simulations to generate predicted values
+x <- c(1,25, 0, 0, 0, 0,0, 0,0,0,0,0,0,0)
+
+set.seed(1234)
+sim.coef <- mvrnorm(15000, logit.fit.5$coefficients, vcov(logit.fit.5))
+
+predvals.sim.0 <- invlogit(sim.coef %*% x)
+
+quantile(predvals.sim.0, seq(0,1,0.01))
+```
+
+```{r}
+#Household Services & Infrastructure: Running the model and getting a probability estimate 
+logit.fit.6 <- glm(y6 ~ age + female + factor(prim_act) + factor(city_size) + rel_others + rel_muslim + rel_christ + caste_others + caste_sc + caste_st + caste_bc, family=binomial(link = "logit")) 
+summary(logit.fit.6)
+
+logit.fit.6$coefficients
+
+x <- c(1,25, 0, 0, 0, 0,0, 0,0,0,0,0,0,0)  ## OC, Hindu, Employed, Big City, Male
+
+invlogit(logit.fit.6$coefficients %*% x)
+
+
+#Simulations to generate predicted values
+x <- c(1,25, 0, 0, 0, 0,0, 0,0,0,0,0,0,0)
+
+set.seed(1234)
+sim.coef <- mvrnorm(15000, logit.fit.6$coefficients, vcov(logit.fit.6))
+
+predvals.sim.0 <- invlogit(sim.coef %*% x)
+
+quantile(predvals.sim.0, seq(0,1,0.01))
+```
+
+
+Plot: Support to citizens across selected sectors (Housing, Education, Health, Cash Support, Business/Loan Support)
+
+```{r, fig.width = 10}
+Neg_Resp <- c("No", "Don't Know", "Don't know")
+
+vec <- c(62, 67, 72, 77, 82) + 1
+
+c <- cbind.data.frame(Col_No = as.numeric(vec), Var_Codes = colnames(AP_Youth_Survey_Merged)[vec], Q_Name = AP_Youth_Survey_Codebook$Column_Name[vec - 1])
+
+Yes_Resp <- Tot_Resp <- rep(NA, length(vec))
+
+for (i in 1:nrow(c)) {
+  
+  t <- as.data.frame(table(AP_Youth_Survey_Merged[,c$Col_No[i]] %in% Neg_Resp))
+  Yes_Resp[i] <- t$Freq[t$Var1 == F]
+  Tot_Resp[i] <- sum(t$Freq, na.rm = T)
+  
+  
+}
+
+c <- cbind.data.frame(c, Yes_Resp, Tot_Resp)
+c$Benefit_Rate = round(100*c$Yes_Resp/c$Tot_Resp, 2)
+
+names <- c("Housing", "Education", "Health", "Cash Support", "Business Support/Loan")
+
+bp <- barplot(c$Benefit_Rate, names.arg = names, ylim = c(0,55), border = NA, col = "dodgerblue", main = "Proportion of Respondents Covered by Schemes", xlab = "Scheme", ylab = "Percentage of Respondents")
+text(bp, c$Benefit_Rate, round(c$Benefit_Rate, 1), pos = 3)
+```
+
+## Cross tabulation: Schemes vs Preference of Schemes
+
+```{r}
+#Housing
+round(prop.table(table((AP_Youth_Survey$Y_E_50 %in% Neg_Resp) == F, AP_Youth_Survey$Y_G_188), 1)*100, 2)
+
+#Health
+round(prop.table(table((AP_Youth_Survey$Y_E_55 %in% Neg_Resp) == F, AP_Youth_Survey$Y_G_188), 1)*100, 2)
+
+#Education
+round(prop.table(table((AP_Youth_Survey$Y_E_60 %in% Neg_Resp) == F, AP_Youth_Survey$Y_G_188), 1)*100, 2)
+
+#Cash Support
+round(prop.table(table((AP_Youth_Survey$Y_E_65 %in% Neg_Resp) == F, AP_Youth_Survey$Y_G_188), 1)*100, 2)
+
+#Business Support
+round(prop.table(table((AP_Youth_Survey$Y_E_70 %in% Neg_Resp) == F, AP_Youth_Survey$Y_G_188), 1)*100, 2)
+```
+
+## Cross tabulation: Schemes vs Attribution
+
+
+```{r}
+#Housing
+round(prop.table(table((AP_Youth_Survey$Y_E_50 %in% Neg_Resp) == F, AP_Youth_Survey$Y_E_80), 1)*100, 2)
+
+#Health
+round(prop.table(table((AP_Youth_Survey$Y_E_55 %in% Neg_Resp) == F, AP_Youth_Survey$Y_E_80), 1)*100, 2)
+
+#Education
+round(prop.table(table((AP_Youth_Survey$Y_E_60 %in% Neg_Resp) == F, AP_Youth_Survey$Y_E_80), 1)*100, 2)
+
+#Cash Support
+round(prop.table(table((AP_Youth_Survey$Y_E_65 %in% Neg_Resp) == F, AP_Youth_Survey$Y_E_80), 1)*100, 2)
+
+#Business Support
+round(prop.table(table((AP_Youth_Survey$Y_E_70 %in% Neg_Resp) == F, AP_Youth_Survey$Y_E_80), 1)*100, 2)
+```
