@@ -4,9 +4,9 @@ library(readxl)
 library(writexl)
 
 #Main Files ####
-AP_Youth_Survey <- read_excel("youth_survey_responses (7th Mar).xlsx")
-AP_Household_Roster <- read_excel("Household Roster Youth Survey (7th Mar).xlsx")
-AP_Outmigration_Roster <- read_excel("Outmigration Roster Youth Survey (7th Mar).xlsx")
+AP_Youth_Survey <- read_excel("youth_survey_responses (12th Mar).xlsx")
+AP_Household_Roster <- read_excel("Household Roster Youth Survey (12th Mar).xlsx")
+AP_Outmigration_Roster <- read_excel("Outmigration Roster Youth Survey (12th Mar).xlsx")
 
 
 #Codebooks ####
@@ -146,7 +146,7 @@ AP_Youth_Survey$`City Name` <- ifelse(AP_Youth_Survey$`City Name` %in% v,
 
 AP_Youth_Survey <- AP_Youth_Survey[AP_Youth_Survey$`City Name` != "N",]
 
-write_xlsx(AP_Youth_Survey, "youth_survey_responses (7th Mar).xlsx")
+write_xlsx(AP_Youth_Survey, "youth_survey_responses (12th Mar).xlsx")
 
 City_Wise_Numbers <- as.data.frame(table(AP_Youth_Survey$`City Name`)); colnames(City_Wise_Numbers) <- c("City Name", "Responses")
 
@@ -166,7 +166,6 @@ AP_Youth_Survey$City_Size_Class <- ifelse(AP_Youth_Survey$`City Name`%in% Small,
                                           ifelse(AP_Youth_Survey$`City Name` %in% Medium, "Medium",
                                                  ifelse(AP_Youth_Survey$`City Name` %in% Large, "Large",
                                                         "NAN")))
-
 
 
 #Roster and Main Survey merge ####
@@ -192,9 +191,9 @@ write_xlsx(AP_Household_NonSelf, "AP_Household_NonSelf_Responses.xlsx")
 
 #Main Survey and Roster merged
 AP_Youth_Survey_Merged <- merge(AP_Youth_Survey, AP_Household_Roster[AP_Household_Roster$H_1 == "Self",], by.x = c("_uuid"), by.y = c("_submission__uuid"))
-attr(AP_Youth_Survey_Merged, "variable.labels") <- c(AP_Youth_Survey_Codebook$Column_Name, AP_Household_Roster_Codebook$Column_Name[AP_Household_Roster_Codebook$Column_Name != "_submission__uuid"])
+attr(AP_Youth_Survey_Merged, "variable.labels") <- c(AP_Youth_Survey_Codebook$Column_Name, AP_Household_Roster_Codebook$Column_Name[AP_Household_Roster_Codebook$Column_Name != "_submission__uuid"], "NAN")
 
-write_xlsx(AP_Youth_Survey_Merged, "AP_YouthSurvey_Roster_Merged (Mar 7th).xlsx")
+write_xlsx(AP_Youth_Survey_Merged, "AP_YouthSurvey_Roster_Merged (Mar 12th).xlsx")
 
 
 #Tables to be created - A (Skilling Response Levels) ####
@@ -283,6 +282,14 @@ AP_Youth_Survey$YR_F_94 <- ifelse(AP_Youth_Survey$Y_F_81 == "Student", AP_Youth_
                                   ifelse(AP_Youth_Survey$Y_F_81 == "Employed", AP_Youth_Survey$Y_F_130, AP_Youth_Survey$Y_F_167))
 
 
+#Code for region wise coding
+Coastal_North <- c("Kakinada", "Peddapuram", "Rajahmundry", "Eluru", "Visakhapatnam", "Nidadavolu")
+Coastal_South <- c("Guntur", "Narasaraopet", "Tenali", "Kavali", "Nellore", "Vijayawada", "Kondapalli")
+Inland_South <- c("Hindupur", "Kadiri", "Rayadurga", "Tirupati","Adoni", "Kurnool", "Tadipatri", "Kadapa")
 
 
+AP_Youth_Survey$City_Geo_Class <- ifelse(AP_Youth_Survey$`City Name`%in% Coastal_North, "Coastal_North",
+                                         ifelse(AP_Youth_Survey$`City Name` %in% Coastal_South, "Coastal_South",
+                                                ifelse(AP_Youth_Survey$`City Name` %in% Inland_South, "Inland_South",
+                                                       "NAN")))
 
