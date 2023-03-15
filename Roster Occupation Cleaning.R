@@ -78,8 +78,6 @@ names <- c("Doctor" , "Engineer","Freelancer","Manager","Nurse","Officer","Other
 
 
 for (i in 1:nrow(AP_Household_Roster)) {
-  
-  if(AP_Household_Roster$HR_10[i] == "Others") {
     
     for (j in 1:length(Vec)) {
       
@@ -88,15 +86,20 @@ for (i in 1:nrow(AP_Household_Roster)) {
       
     }
     
-  } 
+
   
 }
 
-
-
-
 AP_Household_Roster$HR_6 = ifelse(AP_Household_Roster$HR_6 == 0, NA, AP_Household_Roster$HR_6)
+AP_Household_Roster$HR_8 = ifelse(AP_Household_Roster$HR_8 == 0, NA, AP_Household_Roster$HR_8)
 AP_Household_Roster$HR_10 = ifelse(AP_Household_Roster$HR_10 == 0, NA, AP_Household_Roster$HR_10)
 
+
+x <- as.data.frame(table(AP_Household_Roster$H_10, AP_Household_Roster$HR_10)); x <- x[x$Var2 != 0,]
+x$Var1 <- as.character(x$Var1); x$Var2 <- as.character(x$Var2)
+x$check <- ifelse(x$Var1 == x$Var2, 0,1)
+
+
+write_xlsx(AP_Household_Roster, "HH_Roster_Cleaning.xlsx")
 
 #Replace 0s with NAs when done
